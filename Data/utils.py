@@ -1,9 +1,3 @@
-
-from numpy import dtype
-import pandas as pd
-
-
-
 TABLE_DATA = {
     "award_winners": {
         "tournament_id": "str",
