@@ -5,7 +5,7 @@ psycopg2.extensions.register_type(psycopg2.extensions.UNICODE) # se znebimo prob
 from typing import List, TypeVar, Type, Callable
 from pandas import DataFrame
 from re import sub
-import auth_public as auth
+import Data.auth_public as auth
 from datetime import date
 import warnings
 
