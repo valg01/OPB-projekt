@@ -1,0 +1,14 @@
+%rebase('osnova.html', naslov='Prijava', stran='prijava')
+
+<form action="{{url('vloga')}}" method="POST" style="width:60%">
+    <div class="form-group">
+      <label for="vloga">Ime vloge, v kateri si boste ogledali vizualizacije</label>
+      <input type="input" class="form-control" name="vloga"  placeholder="Možne vloge: novinec, entuziast, ekspert">
+    </div>
+   
+    <button type="submit" class="btn btn-primary">Izberi vlogo</button>
+  </form>
+
+  %if napaka:
+  <p class="opozorilo">{{napaka}}</p>
+%end

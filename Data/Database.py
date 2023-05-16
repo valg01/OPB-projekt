@@ -3,15 +3,18 @@ import psycopg2, psycopg2.extensions, psycopg2.extras
 psycopg2.extensions.register_type(psycopg2.extensions.UNICODE) # se znebimo problemov s šumniki
 
 from typing import List, TypeVar, Type, Callable
+from Data.Modeli import Uporabnik
 from pandas import DataFrame
 from re import sub
-import auth_public as auth
+import Data.auth_public as auth
 from datetime import date
 import warnings
 
 import dataclasses
 # Ustvarimo generično TypeVar spremenljivko. Dovolimo le naše entitene, ki jih imamo tudi v bazi
 # kot njene vrednosti. Ko dodamo novo entiteno, jo moramo dodati tudi v to spremenljivko.
+
+T = TypeVar("T", Uporabnik, DataFrame)
 
 
 class Repo:
@@ -21,19 +24,15 @@ class Repo:
         self.conn = psycopg2.connect(database=auth.db, host=auth.host, user=auth.user, password=auth.password, port=5432)
         self.cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
-    """
     def dobi_gen(self, typ: Type[T], take=10, skip=0) -> List[T]:
         # Generična metoda, ki za podan vhodni dataclass vrne seznam teh objektov iz baze. Predpostavljamo, da je tabeli ime natanko tako kot je ime posameznemu dataclassu.
-
 
         # ustvarimo sql select stavek, kjer je ime tabele typ.__name__ oz. ime razreda
         tbl_name = typ.__name__
         sql_cmd = f'''SELECT * FROM {tbl_name} LIMIT {take} OFFSET {skip};'''
         self.cur.execute(sql_cmd)
         return [typ.from_dict(d) for d in self.cur.fetchall()]
-    """
     
-    """
     def dobi_gen_id(self, typ: Type[T], id: int, id_col = "id") -> T:
         # Generična metoda, ki vrne dataclass objekt pridobljen iz baze na podlagi njegovega idja.
         tbl_name = typ.__name__
@@ -46,7 +45,7 @@ class Repo:
             raise Exception(f'Vrstica z id-jem {id} ne obstaja v {tbl_name}');
     
         return typ.from_dict(d)
-    """
+    
 
     """
     def dodaj_gen(self, typ: T, serial_col="id", auto_commit=True):
