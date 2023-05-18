@@ -47,6 +47,63 @@ GROUP BY tournament_name
 order by NumberOfGoals desc;
 
 --Awards by countries 
+SELECT  t.team_name, c.confederation_code, award_name, count(award_id) AS num_of_awards FROM award_winners a
+JOIN players p ON a.player_id = p.player_id
+join player_appearances pa on p.player_id = pa.player_id
+join teams t on pa.team_id = t.team_id
+join confederations c on c.confederation_id = t.confederation_id
+GROUP BY t.team_name, c.confederation_code, a.award_name 
+order by num_of_awards DESC;
+
+DROP VIEW players_age;
+---starost igralcev na posameznih turnirjih (uporabi se view, da ga lahko še polj kličeva)
+CREATE VIEW players_age AS(
+SELECT CAST(RIGHT(pa.tournament_id, 4) AS INT)  - EXTRACT('YEAR' FROM p.birth_date) as age,
+CASE
+ WHEN p.given_name = 'not applicable' then p.family_name
+ ELSE CONCAT(p.family_name || ' ', p.given_name) END
+AS player_name,
+te.team_name,
+t.tournament_name,
+t.host_country
+FROM player_appearances pa
+JOIN players p on p.player_id = pa.player_id
+JOIN tournaments t on t.tournament_id = pa.tournament_id
+JOIN teams te on pa.team_id = te.team_id
+)
+
+
+--Najmlajših 500 igralcev
+CREATE TEMP TABLE temp2 AS
+SELECT DISTINCT * FROM players_age
+order by age ASC
+LIMIT 500;
+
+--Najstarejših 500 igralcev
+CREATE TEMPORARY TABLE temp1 AS
+SELECT DISTINCT * FROM players_age
+order by age DESC
+LIMIT 500;
+
+--Države, ki imajo največ starih igralcev
+select team_name, count(player_name) AS number
+from temp1
+GROUP BY team_name
+ORDER by number DESC;
+
+--Države, ki imajo največ mladih igralcev
+select team_name, count(player_name) AS number
+from temp2
+GROUP BY team_name
+ORDER by number DESC;
+
+--number of substitutions per match
+SELECT m.match_name, t.tournament_name, COALESCE(sum(CASE WHEN pa.substitute THEN 1 ELSE 0 END)) as substitutions  FROM matches m 
+right join player_appearances pa on pa.match_id = m.match_id
+JOIN tournaments t on t.tournament_id = m.tournament_id
+GROUP BY m.match_name, t.tournament_name
+order by tournament_name asc;
+
 
 
 
