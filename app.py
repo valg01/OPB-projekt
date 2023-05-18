@@ -23,7 +23,7 @@ def cookie_required(f):
         print('cookie: ', cookie)
         if cookie:
             return f(*args, **kwargs)
-        return template("vloga.html", url=url, napaka="Za ogled vizualizacij si moraš izbrati vlogo!")
+        return template("vloga.html", url=url, napaka="Za ogled vizualizacij si moraš izbrati vlogo!", vloga=cookie)
     return decorated
 
 @get('/')
@@ -34,7 +34,7 @@ def index():
 
 @get('/vloga')
 def prijava_get():
-    return template("vloga.html", url=url, napaka=None)
+    return template("vloga.html", url=url, napaka=None, vloga=None)
 
 
 @post('/vloga', name='vloga')
