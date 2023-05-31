@@ -142,7 +142,7 @@ fig2.update_layout(
 )
 #fig2.show()
 file_path2 = f"{folder_path}/hosts.html"
-fig.write_html(file_path2, include_plotlyjs = "cdn")
+fig2.write_html(file_path2, include_plotlyjs = "cdn")
 
 awards = """SELECT  t.team_name as team
 , c.confederation_code as confederation_code
@@ -174,7 +174,7 @@ fig3.update_layout(
 
 #fig3.show()
 file_path3 = f"{folder_path}/awards.html"
-fig.write_html(file_path3, include_plotlyjs = "cdn")
+fig3.write_html(file_path3, include_plotlyjs = "cdn")
 
 
 red_cards = """SELECT LEFT(t.tournament_name, 4) AS tournament, count(b.booking_id) AS nm_bookings FROM bookings b
@@ -203,4 +203,4 @@ fig4.update_layout(
 
 #fig4.show()
 file_path4 = f"{folder_path}/red_cards.html"
-fig.write_html(file_path4, include_plotlyjs = "cdn")
+fig4.write_html(file_path4, include_plotlyjs = "cdn")
