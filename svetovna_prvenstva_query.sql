@@ -1,14 +1,18 @@
 --numbers of goals scored by player
-select p.family_name as surname, p.given_name as name, t.team_name as team, count(DISTINCT g.goal_id) as goals from players p
-join goals g on p.player_id = g.player_id
-join player_appearances pa on pa.player_id = p.player_id
-join teams t on pa.team_id = t.team_id
+SELECT CASE
+ WHEN p.given_name = 'not applicable' THEN p.family_name
+ ELSE CONCAT(p.family_name || ' ', p.given_name) END
+AS player_name, t.team_name AS team, count(DISTINCT g.goal_id) AS goals FROM players p
+JOIN goals g ON p.player_id = g.player_id
+JOIN player_appearances pa ON pa.player_id = p.player_id
+JOIN teams t ON pa.team_id = t.team_id
 --where 
 --count_tournaments = 4 AND
 --AND p.family_name = 'Rivaldo' AND
 --p.goal_keeper = true and
 GROUP BY p.family_name, p.given_name, t.team_name
-ORDER BY goals desc;
+ORDER BY goals desc
+LIMIT 100;
 
 --Finds number of matches played at each stadium
 SELECT s.stadium_name as stadium, s.city_name as city, s.country_name as country, COUNT(DISTINCT g.goal_id) as numOfGoals
@@ -104,7 +108,12 @@ JOIN tournaments t on t.tournament_id = m.tournament_id
 GROUP BY m.match_name, t.tournament_name
 order by tournament_name asc;
 
-
+--number of red cards per turnament
+select left(t.tournament_name, 4) AS tournament, count(b.booking_id) AS nm_bookings FROM bookings b
+JOIN tournaments t ON t.tournament_id = b.tournament_id
+GROUP BY tournament_name, b.red_card
+HAVING b.red_card = 'True'
+ORDER BY tournament_name;
 
 
 

@@ -10,7 +10,7 @@ import Data.auth_public as auth
 from datetime import date
 import warnings
 
-import dataclasses
+#import dataclasses
 # Ustvarimo generično TypeVar spremenljivko. Dovolimo le naše entitene, ki jih imamo tudi v bazi
 # kot njene vrednosti. Ko dodamo novo entiteno, jo moramo dodati tudi v to spremenljivko.
 
