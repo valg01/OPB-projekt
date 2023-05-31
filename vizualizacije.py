@@ -1,14 +1,15 @@
 import plotly.graph_objects as go
 import pandas as pd
 import psycopg2
+import Data.auth_public as auth
 import random
 
 connection = psycopg2.connect(
-    host="baza.fmf.uni-lj.si",
+    host=auth.host,
     port="5432",
-    database="sem2023_valg",
-    user="valg",
-    password='mcw4mi0q'
+    database=auth.db,
+    user=auth.user,
+    password=auth.password
 )
 
 nm_goals_player = """SELECT CASE
