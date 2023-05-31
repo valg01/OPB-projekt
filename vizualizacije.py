@@ -119,7 +119,11 @@ fig.update_layout(
     legend_title='Country'  # Set the legend title
 )
 
+folder_path = "/Users/valgroleger/Svetovna-prvenstva-v-nogometu/graphs"
+file_path1 = f"{folder_path}/goals.html"
+fig.write_html(file_path1, include_plotlyjs = "cdn")
 #fig.show()
+
 
 conf_count_host = """SELECT c.confederation_code AS ConfederationCode
 , c.confederation_name AS ConfederationName
@@ -137,6 +141,8 @@ fig2.update_layout(
     title='Count of hosts by confederation',
 )
 #fig2.show()
+file_path2 = f"{folder_path}/hosts.html"
+fig.write_html(file_path2, include_plotlyjs = "cdn")
 
 awards = """SELECT  t.team_name as team
 , c.confederation_code as confederation_code
@@ -167,6 +173,9 @@ fig3.update_layout(
 )
 
 #fig3.show()
+file_path3 = f"{folder_path}/awards.html"
+fig.write_html(file_path3, include_plotlyjs = "cdn")
+
 
 red_cards = """SELECT LEFT(t.tournament_name, 4) AS tournament, count(b.booking_id) AS nm_bookings FROM bookings b
 JOIN tournaments t ON t.tournament_id = b.tournament_id
@@ -193,3 +202,5 @@ fig4.update_layout(
 )
 
 #fig4.show()
+file_path4 = f"{folder_path}/red_cards.html"
+fig.write_html(file_path4, include_plotlyjs = "cdn")
