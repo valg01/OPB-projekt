@@ -12,6 +12,11 @@ import os
 SERVER_PORT = os.environ.get('BOTTLE_PORT', 8080)
 RELOADER = os.environ.get('BOTTLE_RELOADER', True)
 
+def include_file(filename):
+    return bottle.static_file(filename, root='./views')
+
+bottle.SimpleTemplate.defaults["include_file"] = include_file
+
 
 repo = Repo()
 auth = AuthService(repo)
