@@ -119,7 +119,7 @@ fig.update_layout(
     legend_title='Country'  # Set the legend title
 )
 
-folder_path = "/Users/valgroleger/Svetovna-prvenstva-v-nogometu/graphs"
+folder_path = "/Users/valgroleger/Svetovna-prvenstva-v-nogometu/views/graphs"
 file_path1 = f"{folder_path}/goals.html"
 fig.write_html(file_path1, include_plotlyjs = "cdn")
 #fig.show()
