@@ -12,6 +12,11 @@ import os
 SERVER_PORT = os.environ.get('BOTTLE_PORT', 8080)
 RELOADER = os.environ.get('BOTTLE_RELOADER', True)
 
+def include_file(filename):
+    return bottle.static_file(filename, root='./views')
+
+bottle.SimpleTemplate.defaults["include_file"] = include_file
+
 
 repo = Repo()
 auth = AuthService(repo)
@@ -23,7 +28,7 @@ def cookie_required(f):
         print('cookie: ', cookie)
         if cookie:
             return f(*args, **kwargs)
-        return template("vloga.html", url=url, napaka="Za ogled vizualizacij si moraš izbrati vlogo!")
+        return template("vloga.html", url=url, napaka="Za ogled vizualizacij si moraš izbrati vlogo!", vloga=cookie)
     return decorated
 
 @get('/')
@@ -34,7 +39,7 @@ def index():
 
 @get('/vloga')
 def prijava_get():
-    return template("vloga.html", url=url, napaka=None)
+    return template("vloga.html", url=url, napaka=None, vloga=None)
 
 
 @post('/vloga', name='vloga')
