@@ -154,3 +154,4 @@ cython_debug/
 # Remove env file that contain environments
 
 /env
+.DS_Store
