@@ -4,13 +4,7 @@ import psycopg2
 import Data.auth_public as auth
 import random
 
-connection = psycopg2.connect(
-    host=auth.host,
-    port="5432",
-    database=auth.db,
-    user=auth.user,
-    password=auth.password
-)
+connection = auth.connect()
 
 nm_goals_player = """SELECT CASE
  WHEN p.given_name = 'not applicable' THEN p.family_name
