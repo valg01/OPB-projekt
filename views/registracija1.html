@@ -1,0 +1,94 @@
+% setdefault('napaka', '')
+% setdefault('znacka', 0)
+% setdefault('naslov', 'Registracija')
+% rebase('base1.html', napaka=napaka, naslov=naslov)
+
+<form action="{{url('registracija_post')}}" method="post" autocomplete="off"
+    style=" margin: auto; margin-top: 40px; width: 15cm;">
+
+    <div class="row g-3 needs-validation was-validated">
+        <div class="input-group">
+            <span class="input-group-text" id="basic-addon1">Ime</span>
+            <input type="text" name="ime" class="form-control" aria-label="Username" aria-describedby="basic-addon1"
+                id="validationTooltip01" required oninput="this.setCustomValidity('')"
+                oninvalid="this.setCustomValidity('Obvezno polje')">
+        </div>
+    </div>
+    <br>
+    <div class="row g-3 needs-validation was-validated">
+        <div class="input-group">
+            <span class="input-group-text" id="basic-addon1">Priimek</span>
+            <input type="text" name="priimek" class="form-control" aria-label="Username" aria-describedby="basic-addon1"
+                id="validationTooltip01" required oninput="this.setCustomValidity('')"
+                oninvalid="this.setCustomValidity('Obvezno polje')">
+        </div>
+    </div>
+
+    <br>
+    <div class="row g-3 needs-validation was-validated">
+        <div class="input-group">
+            <label class="input-group-text" for="vloga">Vloga</label>
+            <select class="form-select" id="vloga" name="vloga" required>
+                <option value="" {% if vloga=='' %} selected {% endif %} disabled hidden>Izberi vlogo</option>
+                <option value="novinec" {% if vloga=='novinec' %} selected {% endif %}>Novinec</option>
+                <option value="entuziast" {% if vloga=='entuziast' %} selected {% endif %}>Entuziast</option>
+                <option value="ekspert" {% if vloga=='ekspert' %} selected {% endif %}>Ekspert</option>
+            </select>
+        </div>
+    </div>
+
+    <br>
+    <div class="row g-3 needs-validation was-validated">
+        <div class="input-group">
+            <label class="input-group-text" for="navijaska_drzava">Država, za katero navijate</label>
+            <select class="form-select" id="navijaska_drzava" name="navijaska_drzava" required>
+                <option value="" {% if navijaska_drzava=='' %} selected {% endif %} disabled hidden>Izberi državo
+                </option>
+                <option value="MCD" {% if navijaska_drzava=='MCD' %} selected {% endif %}>MCD</option>
+                <option value="CRO" {% if navijaska_drzava=='CRO' %} selected {% endif %}>CRO</option>
+                <option value="SRB" {% if navijaska_drzava=='SRB' %} selected {% endif %}>SRB</option>
+                <option value="BIH" {% if navijaska_drzava=='BIH' %} selected {% endif %}>BIH</option>
+                <option value="ALB" {% if navijaska_drzava=='ALB' %} selected {% endif %}>ALB</option>
+                <option value="SLO" {% if navijaska_drzava=='SLO' %} selected {% endif %}>SLO</option>
+            </select>
+        </div>
+    </div>
+
+    <br>
+    <div class="row g-3 needs-validation was-validated">
+        <div class="input-group">
+            <span class="input-group-text" id="basic-addon1">Email</span>
+            <input type="email" name="email" class="form-control" aria-label="Email" aria-describedby="basic-addon1"
+                id="validationTooltip01" required oninput="this.setCustomValidity('')"
+                oninvalid="this.setCustomValidity('Obvezno polje')">
+        </div>
+    </div>
+
+    <br>
+    <div class="row g-3 needs-validation was-validated">
+        <div class="input-group ">
+            <span class="input-group-text" id="basic-addon1">Geslo</span>
+            <input type="password" class="form-control" name="geslo" aria-label="Password"
+                aria-describedby="basic-addon1" id="validationTooltip01" required oninput="this.setCustomValidity('')"
+                oninvalid="this.setCustomValidity('Obvezno polje')">
+        </div>
+    </div>
+    <br>
+    <div class="row g-3 needs-validation was-validated">
+        <div class="input-group">
+            <span class="input-group-text" id="basic-addon1">Ponovi geslo</span>
+            <input type="password" class="form-control" name="geslo2" aria-label="Password"
+                aria-describedby="basic-addon1" id="validationTooltip01" required oninput="this.setCustomValidity('')"
+                oninvalid="this.setCustomValidity('Obvezno polje')">
+        </div>
+    </div>
+    <br>
+    <div class="row g-3 needs-validation was-validated">
+        <div class="d-grid gap-2 col-6 mx-auto">
+            <button type="submit" class="btn btn-outline-light">
+                Registriraj se!
+            </button>
+        </div>
+    </div>
+
+</form>
