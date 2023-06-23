@@ -51,7 +51,7 @@ def static(filename):
 @get('/', name='index')
 def index():
     znacka = preveriZnacko()
-    return template('zacetna_stran1.html', url=url, znacka=znacka)
+    return template('zacetna_stran.html', url=url, znacka=znacka)
 
 @get('/registracija', name='registracija_get')
 def registracija_get():
@@ -61,7 +61,7 @@ def registracija_get():
     priimek = request.get_cookie("priimek")
     email = request.get_cookie("email", "_")
     navijaska_drzava = request.get_cookie("navijaska_drzava")
-    return template("registracija1.html", url=url, napaka=napaka, vloga=vloga, ime=ime, priimek=priimek, navijaska_drzava=navijaska_drzava, email=email)
+    return template("registracija.html", url=url, napaka=napaka, vloga=vloga, ime=ime, priimek=priimek, navijaska_drzava=navijaska_drzava, email=email)
 
 
 @post('/registracija', name='registracija_post')
@@ -95,8 +95,9 @@ def registracija_post():
         print("Vnos v bazo...")
         cur.execute("""
             INSERT INTO uporabniki (ime, priimek, email, geslo, navijaska_drzava)
-            VALUES ('a', 'a', 'a', 'a', 'a');
+            VALUES (%s, %s, %s, %s, %s);
         """, (ime, priimek, email, hash_gesla, navijaska_drzava))
+        print("Vnos uspešen!")
         
         id_uporabnika = cur.fetchone()[0]
         conn.commit()
