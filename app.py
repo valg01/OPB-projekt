@@ -3,7 +3,6 @@
 
 import os
 from functools import wraps
-from time import sleep
 
 import psycopg2
 import psycopg2.extensions
@@ -12,7 +11,8 @@ import psycopg2.extras
 import Data.auth_public as auth
 from app_utils import RegistracijaUtils
 from bottleext import (get, post, redirect, request, response, route, run,
-                       static_file, template, url)
+                       static_file, url, template)
+import bottle
 from Data.Database import Repo
 from Data.Modeli import *
 from Data.Services import AuthService
@@ -54,7 +54,7 @@ def static(filename):
 @get("/", name="index")
 def index():
     znacka = preveriZnacko()
-    return template("zacetna_stran.html", url=url, znacka=znacka)
+    return template("zacetna_stran.html", znacka=znacka)
 
 
 @get("/registracija", name="registracija_get")
@@ -67,7 +67,6 @@ def registracija_get():
     navijaska_drzava = request.get_cookie("navijaska_drzava")
     return template(
         "registracija.html",
-        url=url,
         napaka=napaka,
         vloga=vloga,
         ime=ime,
