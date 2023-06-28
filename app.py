@@ -9,7 +9,7 @@ import psycopg2.extensions
 import psycopg2.extras
 
 import Data.auth_public as auth
-from app_utils import RegistracijaUtils
+from app_utils import RegistracijaUtils, DBUtils
 from bottleext import (get, post, redirect, request, response, route, run,
                        static_file, url, template)
 from Data.Database import Repo
@@ -102,20 +102,17 @@ def registracija_post():
         response.set_cookie("email", email, path="/", secret=SECRET_COOKIE_KEY)
         redirect(url("registracija_get"))
 
-    hash_gesla = RegistracijaUtils.izracunaj_hash_gesla(geslo)
+    hash_gesla = DBUtils.izracunaj_hash_gesla(geslo)
 
     try:
         print("Vnos v bazo...")
+        # TODO: Tukaj se zalomi
         cur.execute(
-            """
-            INSERT INTO uporabniki (ime, priimek, email, geslo, navijaska_drzava)
-            VALUES (%s, %s, %s, %s, %s);
-        """,
-            (ime, priimek, email, hash_gesla, navijaska_drzava),
+            "INSERT INTO uporabniki (ime, priimek, email, geslo, navijaska_drzava) VALUES (%s, %s, %s, %s, %s)", (ime, priimek, email, hash_gesla, navijaska_drzava),
         )
         print("Vnos uspešen!")
 
-        id_uporabnika = cur.fetchone()[0]
+        id_uporabnika = DBUtils().dobi_prvi_rezultat(cur)
         conn.commit()
         print("Vnos uspešen!")
         response.set_cookie("id", id_uporabnika, path="/", secret=SECRET_COOKIE_KEY)
@@ -125,6 +122,33 @@ def registracija_post():
     redirect(url("registracija_get"))
     return
 
+@get('/prijava') 
+def prijava_get():
+    napaka = request.get_cookie("sporocilo")
+    return template("prijava.html", naslov = "Prijava", napaka=napaka)
+
+@post('/prijava')
+def prijava_post():
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    email = request.forms.email # type: ignore
+    geslo = request.forms.geslo # type: ignore
+    try: 
+        cur.execute("SELECT geslo FROM uporabniki WHERE email = %s", [email])
+        hash_baza = DBUtils().dobi_prvi_rezultat(cur)
+    except:
+        response.set_cookie("sporocilo", "Elektronski naslov ne obstaja!")
+        redirect(url('prijava_get'))
+        return
+
+    if DBUtils.izracunaj_hash_gesla(geslo) != hash_baza:
+        response.set_cookie("sporocilo", "Ob danem elektronskem naslovu niste zapisali ustreznega gesla!")
+        redirect(url('prijava_get'))
+    
+    cur.execute('SELECT id FROM uporabniki WHERE email = %s', [email])
+    id_uporabnika = DBUtils().dobi_prvi_rezultat(cur)
+    response.set_cookie('id', id_uporabnika, secret=SECRET_COOKIE_KEY, path='/')
+    redirect(url('prijava_get'))
+
 
 if __name__ == "__main__":
-    run(host="localhost", port=SERVER_PORT, reloader=RELOADER, debug=True)
+    run(host="localhost", port=int(SERVER_PORT), reloader=bool(RELOADER), debug=True)

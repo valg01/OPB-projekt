@@ -1,6 +1,16 @@
 import hashlib
 
 
+class DBUtils:
+
+    @staticmethod
+    def dobi_prvi_rezultat(cur):
+        return cur.fetchone()[0]
+    
+    @staticmethod
+    def izracunaj_hash_gesla(geslo):
+        return hashlib.sha256(geslo.encode()).hexdigest()
+
 class RegistracijaUtils:
     @staticmethod
     def _email_ze_obstaja_q(email, cur):
@@ -14,9 +24,6 @@ class RegistracijaUtils:
         except:
             return False
 
-    @staticmethod
-    def izracunaj_hash_gesla(geslo):
-        return hashlib.sha256(geslo.encode()).hexdigest()
 
     @staticmethod
     def _gesli_enaki(geslo, ponovljeno_geslo):
@@ -37,3 +44,4 @@ class RegistracijaUtils:
             return (False, "Gesli se ne ujemata!")
         else:
             return (True, "")
+
