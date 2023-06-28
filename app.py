@@ -12,7 +12,6 @@ import Data.auth_public as auth
 from app_utils import RegistracijaUtils
 from bottleext import (get, post, redirect, request, response, route, run,
                        static_file, url, template)
-import bottle
 from Data.Database import Repo
 from Data.Modeli import *
 from Data.Services import AuthService
