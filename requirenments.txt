@@ -1,7 +1,0 @@
-pandas>=1.2.4
-requests>=2.25.1
-bcrypt>=3.2.0
-dataclasses-json>=0.5.2
-dataclasses>=0.6
-bottle>=0.12.19
-plotly>=5.5.0
