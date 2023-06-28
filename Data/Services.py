@@ -1,11 +1,12 @@
+import dataclasses
+from datetime import date
+from re import sub
+from typing import Dict, Type
+
+import bcrypt
+
 from Data.Database import Repo
 from Data.Modeli import *
-from typing import Dict
-from re import sub
-import dataclasses
-import bcrypt
-from typing import Type
-from datetime import date
 
 
 class AuthService:

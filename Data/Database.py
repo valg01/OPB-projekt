@@ -1,17 +1,21 @@
 # uvozimo psycopg2
-import psycopg2, psycopg2.extensions, psycopg2.extras
+import psycopg2
+import psycopg2.extensions
+import psycopg2.extras
 
 psycopg2.extensions.register_type(
     psycopg2.extensions.UNICODE
 )  # se znebimo problemov s šumniki
 
-from typing import List, TypeVar, Type, Callable
-from Data.Modeli import Uporabnik
-from pandas import DataFrame
-from re import sub
-import Data.auth_public as auth
-from datetime import date
 import warnings
+from datetime import date
+from re import sub
+from typing import Callable, List, Type, TypeVar
+
+from pandas import DataFrame
+
+import Data.auth_public as auth
+from Data.Modeli import Uporabnik
 
 # import dataclasses
 # Ustvarimo generično TypeVar spremenljivko. Dovolimo le naše entitene, ki jih imamo tudi v bazi

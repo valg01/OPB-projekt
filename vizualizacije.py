@@ -1,8 +1,10 @@
-import plotly.graph_objects as go
-import pandas as pd
-import psycopg2
-import Data.auth_public as auth
 import random
+
+import pandas as pd
+import plotly.graph_objects as go
+import psycopg2
+
+import Data.auth_public as auth
 
 connection = auth.connect()
 

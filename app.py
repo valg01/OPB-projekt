@@ -1,32 +1,21 @@
 #!/usr/bin/python
 # -*- encoding: utf-8 -*-
 
-import bottle
-from bottle import (
-    get,
-    post,
-    run,
-    request,
-    template,
-    redirect,
-    response,
-    url,
-    static_file,
-    route,
-)
+import os
+from functools import wraps
+from time import sleep
+
+import psycopg2
+import psycopg2.extensions
+import psycopg2.extras
+
+import Data.auth_public as auth
+from app_utils import RegistracijaUtils
+from bottleext import (get, post, redirect, request, response, route, run,
+                       static_file, template, url)
 from Data.Database import Repo
 from Data.Modeli import *
 from Data.Services import AuthService
-from functools import wraps
-import os
-import Data.auth_public as auth
-import hashlib
-
-import psycopg2, psycopg2.extensions, psycopg2.extras
-
-from app_utils import RegistracijaUtils
-
-from time import sleep
 
 # problem s šumniki
 psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
