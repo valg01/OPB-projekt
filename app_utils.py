@@ -1,10 +1,10 @@
 import hashlib
 
-class RegistracijaUtils:
 
+class RegistracijaUtils:
     @staticmethod
     def _email_ze_obstaja_q(email, cur):
-        try: 
+        try:
             cur.execute(f"SELECT * FROM uporabnik WHERE email = {email}")
             data = cur.fetchall()
             if data != []:
@@ -13,11 +13,11 @@ class RegistracijaUtils:
                 return False
         except:
             return False
-    
+
     @staticmethod
     def izracunaj_hash_gesla(geslo):
         return hashlib.sha256(geslo.encode()).hexdigest()
-    
+
     @staticmethod
     def _gesli_enaki(geslo, ponovljeno_geslo):
         return geslo == ponovljeno_geslo
@@ -25,7 +25,7 @@ class RegistracijaUtils:
     @staticmethod
     def _geslo_prekratko(geslo):
         return len(geslo) < 4
-    
+
     @staticmethod
     def registracija_ok_q(geslo, ponovljeno_geslo, email, cur):
         """Pogleda, če je registracija ok. Če je, vrne (True, ""), sicer pa (False, {{napaka}})."""

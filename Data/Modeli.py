@@ -10,13 +10,8 @@ class Uporabnik:
     password_hash: str = field(default="")
     last_login: str = field(default="")
 
+
 @dataclass
 class UporabnikDto:
     username: str = field(default="")
     role: str = field(default="")
-
-
-
-
-
-

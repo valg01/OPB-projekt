@@ -54,7 +54,7 @@ for country in df['team'].unique():
 # )
 
 fig.show()
-"""""
+""" ""
 """""
 df_sorted = df.sort_values('goals', ascending=False)
 
@@ -89,34 +89,34 @@ fig.show()
 fig = go.Figure()
 
 # Sort the DataFrame by 'goals' column in descending order
-df_sorted = df.sort_values('goals', ascending=False)
+df_sorted = df.sort_values("goals", ascending=False)
 
-for country in df_sorted['team'].unique():
+for country in df_sorted["team"].unique():
     # Filter the DataFrame for the current country
-    filtered_df = df_sorted[df_sorted['team'] == country]
-    
+    filtered_df = df_sorted[df_sorted["team"] == country]
+
     # Add a trace for each country
     fig.add_trace(
         go.Bar(
-            x=filtered_df['player_name'],
-            y=filtered_df['goals'],
+            x=filtered_df["player_name"],
+            y=filtered_df["goals"],
             name=country,
-            width=0.5
+            width=0.5,
         )
     )
 
 fig.update_layout(
-    title='Number of Goals by Player',
-    xaxis_title='Player Names',
-    yaxis_title='Number of Goals',
+    title="Number of Goals by Player",
+    xaxis_title="Player Names",
+    yaxis_title="Number of Goals",
     # barmode='group',  # To group the bars by player
-    legend_title='Country'  # Set the legend title
+    legend_title="Country",  # Set the legend title
 )
 
 folder_path = "/Users/valgroleger/Svetovna-prvenstva-v-nogometu/views/graphs"
 file_path1 = f"{folder_path}/goals.html"
-fig.write_html(file_path1, include_plotlyjs = "cdn")
-#fig.show()
+fig.write_html(file_path1, include_plotlyjs="cdn")
+# fig.show()
 
 
 conf_count_host = """SELECT c.confederation_code AS ConfederationCode
@@ -129,14 +129,14 @@ GROUP BY c.confederation_code, c.confederation_name;"""
 
 df2 = pd.read_sql_query(conf_count_host, connection)
 
-fig2 = go.Figure(data = [go.Pie(labels=df2['confederationcode'], values=df2['number'])])
+fig2 = go.Figure(data=[go.Pie(labels=df2["confederationcode"], values=df2["number"])])
 
 fig2.update_layout(
-    title='Count of hosts by confederation',
+    title="Count of hosts by confederation",
 )
-#fig2.show()
+# fig2.show()
 file_path2 = f"{folder_path}/hosts.html"
-fig2.write_html(file_path2, include_plotlyjs = "cdn")
+fig2.write_html(file_path2, include_plotlyjs="cdn")
 
 awards = """SELECT  t.team_name as team
 , c.confederation_code as confederation_code
@@ -153,22 +153,19 @@ order by num_of_awards DESC;"""
 df3 = pd.read_sql_query(awards, connection)
 
 parent = []
-for drzava in df3['team'].unique():
+for drzava in df3["team"].unique():
     parent.append("")
 
-fig3 = go.Figure(go.Treemap(
-    labels = df3['team'],
-    parents = parent,
-    values= df3['num_of_awards']
-)
+fig3 = go.Figure(
+    go.Treemap(labels=df3["team"], parents=parent, values=df3["num_of_awards"])
 )
 fig3.update_layout(
-    title='Number of individual awards by team',
+    title="Number of individual awards by team",
 )
 
-#fig3.show()
+# fig3.show()
 file_path3 = f"{folder_path}/awards.html"
-fig3.write_html(file_path3, include_plotlyjs = "cdn")
+fig3.write_html(file_path3, include_plotlyjs="cdn")
 
 
 red_cards = """SELECT LEFT(t.tournament_name, 4) AS tournament, count(b.booking_id) AS nm_bookings FROM bookings b
@@ -181,20 +178,22 @@ df4 = pd.read_sql_query(red_cards, connection)
 
 fig4 = go.Figure()
 
-fig4.add_trace(go.Scatter(
-    x=df4['tournament'],
-    y=df4['nm_bookings'],
-    mode='lines',
-    name='Line',
-    line=dict(color='red')
-))
-
-fig4.update_layout(
-    title='Number of red cards per tournament',
-    xaxis_title='Year',
-    yaxis_title='Number of red cards'
+fig4.add_trace(
+    go.Scatter(
+        x=df4["tournament"],
+        y=df4["nm_bookings"],
+        mode="lines",
+        name="Line",
+        line=dict(color="red"),
+    )
 )
 
-#fig4.show()
+fig4.update_layout(
+    title="Number of red cards per tournament",
+    xaxis_title="Year",
+    yaxis_title="Number of red cards",
+)
+
+# fig4.show()
 file_path4 = f"{folder_path}/red_cards.html"
-fig4.write_html(file_path4, include_plotlyjs = "cdn")
+fig4.write_html(file_path4, include_plotlyjs="cdn")

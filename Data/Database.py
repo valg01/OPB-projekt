@@ -1,6 +1,9 @@
 # uvozimo psycopg2
 import psycopg2, psycopg2.extensions, psycopg2.extras
-psycopg2.extensions.register_type(psycopg2.extensions.UNICODE) # se znebimo problemov s šumniki
+
+psycopg2.extensions.register_type(
+    psycopg2.extensions.UNICODE
+)  # se znebimo problemov s šumniki
 
 from typing import List, TypeVar, Type, Callable
 from Data.Modeli import Uporabnik
@@ -10,7 +13,7 @@ import Data.auth_public as auth
 from datetime import date
 import warnings
 
-#import dataclasses
+# import dataclasses
 # Ustvarimo generično TypeVar spremenljivko. Dovolimo le naše entitene, ki jih imamo tudi v bazi
 # kot njene vrednosti. Ko dodamo novo entiteno, jo moramo dodati tudi v to spremenljivko.
 
@@ -18,34 +21,37 @@ T = TypeVar("T", Uporabnik, DataFrame)
 
 
 class Repo:
-
-    
     def __init__(self):
-        self.conn = psycopg2.connect(database=auth.db, host=auth.host, user=auth.user, password=auth.password, port=5432)
+        self.conn = psycopg2.connect(
+            database=auth.db,
+            host=auth.host,
+            user=auth.user,
+            password=auth.password,
+            port=5432,
+        )
         self.cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    
+
     def dobi_gen(self, typ: Type[T], take=10, skip=0) -> List[T]:
         # Generična metoda, ki za podan vhodni dataclass vrne seznam teh objektov iz baze. Predpostavljamo, da je tabeli ime natanko tako kot je ime posameznemu dataclassu.
 
         # ustvarimo sql select stavek, kjer je ime tabele typ.__name__ oz. ime razreda
         tbl_name = typ.__name__
-        sql_cmd = f'''SELECT * FROM {tbl_name} LIMIT {take} OFFSET {skip};'''
+        sql_cmd = f"""SELECT * FROM {tbl_name} LIMIT {take} OFFSET {skip};"""
         self.cur.execute(sql_cmd)
         return [typ.from_dict(d) for d in self.cur.fetchall()]
-    
-    def dobi_gen_id(self, typ: Type[T], id: int, id_col = "id") -> T:
+
+    def dobi_gen_id(self, typ: Type[T], id: int, id_col="id") -> T:
         # Generična metoda, ki vrne dataclass objekt pridobljen iz baze na podlagi njegovega idja.
         tbl_name = typ.__name__
-        sql_cmd = f'SELECT * FROM {tbl_name} WHERE {id_col} = %s';
+        sql_cmd = f"SELECT * FROM {tbl_name} WHERE {id_col} = %s"
         self.cur.execute(sql_cmd, (id,))
 
         d = self.cur.fetchone()
 
         if d is None:
-            raise Exception(f'Vrstica z id-jem {id} ne obstaja v {tbl_name}');
-    
+            raise Exception(f"Vrstica z id-jem {id} ne obstaja v {tbl_name}")
+
         return typ.from_dict(d)
-    
 
     """
     def dodaj_gen(self, typ: T, serial_col="id", auto_commit=True):
@@ -76,7 +82,7 @@ class Repo:
 
         # Dobro se je zavedati, da tukaj sam dataclass dejansko
         # "mutiramo" in ne ustvarimo nove reference. Return tukaj ni niti potreben.
-    """ 
+    """
 
     """
     def dodaj_gen_list(self, typs: List[T], serial_col="id"):
@@ -137,7 +143,7 @@ class Repo:
         # izvedemo sql
         self.cur.execute(sql_cmd, parameters)
         if auto_commit: self.conn.commit()
-    """    
+    """
 
     """
     def posodobi_list_gen(self, typs : List[T], id_col = "id"):
@@ -151,16 +157,17 @@ class Repo:
         self.conn.commit()
     """
 
-    
     def camel_case(self, s):
         """
         Pomožna funkcija, ki podan niz spremeni v camel case zapis.
         """
-        
-        s = sub(r"(_|-)+", " ", s).title().replace(" ", "")
-        return ''.join(s)     
 
-    def col_to_sql(self, col: str, column_types_mapping: str, use_camel_case=True, is_key=False):
+        s = sub(r"(_|-)+", " ", s).title().replace(" ", "")
+        return "".join(s)
+
+    def col_to_sql(
+        self, col: str, column_types_mapping: str, use_camel_case=True, is_key=False
+    ):
         """
         Funkcija ustvari del sql stavka za create table na podlagi njegovega imena
         in (python) tipa. Dodatno ga lahko opremimo še z primary key omejitvijo
@@ -182,14 +189,23 @@ class Repo:
                 return f'"{col}" DATE'
             case "str":
                 return f'"{col}" TEXT{" PRIMARY KEY" if  is_key else ""}'
-        
-        warnings.warn(f'stolpec {col} se ne ujema z nobenim izmed tipov [int, float, bool, date, string]. Shranjujem ta stolpec kot tip TEXT.')
+
+        warnings.warn(
+            f"stolpec {col} se ne ujema z nobenim izmed tipov [int, float, bool, date, string]. Shranjujem ta stolpec kot tip TEXT."
+        )
 
         return f'"{col}" TEXT{" PRIMARY KEY" if  is_key else ""}'
-    
-    def df_to_sql_create(self, df: DataFrame, name: str, column_types_mapping: str, add_serial=False, use_camel_case=True) -> str:
+
+    def df_to_sql_create(
+        self,
+        df: DataFrame,
+        name: str,
+        column_types_mapping: str,
+        add_serial=False,
+        use_camel_case=True,
+    ) -> str:
         """
-        Funkcija ustvari in izvede sql stavek za create table na podlagi podanega pandas DataFrame-a. 
+        Funkcija ustvari in izvede sql stavek za create table na podlagi podanega pandas DataFrame-a.
         df: DataFrame za katerega zgradimo sql stavek
         name: ime nastale tabele v bazi
         add_serial: opcijski parameter, ki nam pove ali želimo dodat serial primary key stolpec
@@ -201,23 +217,29 @@ class Repo:
         cols_sql = ""
 
         # dodamo serial primary key
-        if add_serial: cols_sql += 'Id SERIAL PRIMARY KEY,\n'
-        
+        if add_serial:
+            cols_sql += "Id SERIAL PRIMARY KEY,\n"
+
         # dodamo ostale stolpce
         # tukaj bi stolpce lahko še dodatno filtrirali, preimenovali, itd.
-        cols_sql += ",\n".join([self.col_to_sql(col, column_types_mapping, use_camel_case=use_camel_case) for col, typ in cols.items()])
-
+        cols_sql += ",\n".join(
+            [
+                self.col_to_sql(
+                    col, column_types_mapping, use_camel_case=use_camel_case
+                )
+                for col, typ in cols.items()
+            ]
+        )
 
         # zgradimo končen sql stavek
-        sql = f'''CREATE TABLE IF NOT EXISTS {name}(
+        sql = f"""CREATE TABLE IF NOT EXISTS {name}(
             {cols_sql}
-        )'''
+        )"""
 
         self.cur.execute(sql)
         self.conn.commit()
-        
 
-    def df_to_sql_insert(self, df:DataFrame, name:str, use_camel_case=True):
+    def df_to_sql_insert(self, df: DataFrame, name: str, use_camel_case=True):
         """
         Vnese DataFrame v postgresql bazo. Paziti je treba pri velikosti dataframa,
         saj je sql stavek omejen glede na dolžino. Če je dataframe prevelik, ga je potrebno naložit
@@ -230,18 +252,18 @@ class Repo:
         cols = list(df.columns)
 
         # po potrebi pretvorimo imena stolpcev
-        if use_camel_case: cols = [self.camel_case(c) for c in cols]
+        if use_camel_case:
+            cols = [self.camel_case(c) for c in cols]
 
         # ustvarimo sql stavek, ki vnese več vrstic naenkrat
-        sql_cmd = f'''INSERT INTO {name} ({", ".join([f'"{c}"' for c in cols])})
+        sql_cmd = f"""INSERT INTO {name} ({", ".join([f'"{c}"' for c in cols])})
             VALUES 
             {','.join(
                 self.cur.mogrify(f'({",".join(["%s"]*len(cols))})', i).decode('utf-8')
                 for i in df.itertuples(index=False)
                 )}
-        '''
+        """
 
         # izvedemo ukaz
         self.cur.execute(sql_cmd)
         self.conn.commit()
- 
