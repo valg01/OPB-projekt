@@ -260,5 +260,10 @@ def uporabnik_post():
     redirect(url("uporabnik_get"))
 
 
+@get('/about')
+def about():
+    znacka = preveri_znacko()
+    return template("about.html", naslov='O podjetju', znacka=znacka)
+
 if __name__ == "__main__":
     run(host="localhost", port=int(SERVER_PORT), reloader=bool(RELOADER), debug=True)
