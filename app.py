@@ -78,6 +78,11 @@ def index():
     return template("zacetna_stran.html", znacka=znacka)
 
 
+def dobi_vse_drzave(cur):
+    cur.execute("SELECT team_name FROM teams")
+    return GeneralUtils().flatten_list(cur.fetchall())
+
+
 @get("/registracija", name="registracija_get")
 def registracija_get():
     napaka = request.get_cookie("sporocilo")
@@ -94,6 +99,7 @@ def registracija_get():
         priimek=priimek,
         navijaska_drzava=navijaska_drzava,
         email=email,
+        vse_mozne_drzave=dobi_vse_drzave(cur),
     )
 
 

@@ -45,12 +45,9 @@
             <select class="form-select" id="navijaska_drzava" name="navijaska_drzava" required>
                 <option value="" {% if navijaska_drzava=='' %} selected {% endif %} disabled hidden>Izberi državo
                 </option>
-                <option value="MCD" {% if navijaska_drzava=='MCD' %} selected {% endif %}>MCD</option>
-                <option value="CRO" {% if navijaska_drzava=='CRO' %} selected {% endif %}>CRO</option>
-                <option value="SRB" {% if navijaska_drzava=='SRB' %} selected {% endif %}>SRB</option>
-                <option value="BIH" {% if navijaska_drzava=='BIH' %} selected {% endif %}>BIH</option>
-                <option value="ALB" {% if navijaska_drzava=='ALB' %} selected {% endif %}>ALB</option>
-                <option value="SLO" {% if navijaska_drzava=='SLO' %} selected {% endif %}>SLO</option>
+                % for el in vse_mozne_drzave:
+                    <option value="{{el}}">{{el}}</option>
+                % end
             </select>
         </div>
     </div>
