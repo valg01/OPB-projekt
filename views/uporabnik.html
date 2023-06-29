@@ -1,0 +1,61 @@
+% setdefault('napaka', '')
+% setdefault('znacka', 0)
+% setdefault('naslov', '')
+% rebase('base.html', napaka=napaka, naslov=naslov)
+
+<br>
+<form action="{{url('uporabnik_post')}}" method="post">
+    <div class="container">
+        <div class="row justify-content-md-center">
+            <div class="col col-lg-2">
+                <p class="h4">
+                    Izbor držav
+                </p>
+            </div>
+            <hr>
+            Dodaj državo:
+            <div class="col col-lg-2">
+                <select name="ime_dodane_drzave" class="form-select" style="width:auto;">
+                    <option value=""></option>
+                    %for el in razpolozljive_drzave:
+                    <option value='{{el}}'>{{el}}</option>
+                    %end
+                </select>
+            </div>
+            <div class="col col-lg-2">
+                <button type="submit" class="btn btn-outline-light btn-padding-y">Dodaj državo</button>
+            </div>
+            <hr>
+            Odstrani državo:
+            <div class="col col-lg-2">
+                <select name="ime_drzave_za_odstraniti" class="form-select" style="width:auto;">
+                    <option value=""></option>
+                    %for el in ze_izbrane_drzave:
+                    <option value='{{el}}'>{{el}}</option>
+                    %end
+                </select>
+            </div>
+            <div class="col col-lg-2">
+                <button type="submit" class="btn btn-outline-light btn-padding-y">Odstrani državo</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<br>
+
+<div class="container">
+    <div class="row justify-content-md-center row-cols-4">
+        %if len(ze_izbrane_drzave) == 0:
+        <div class="col text-start bg-dark border border-white rounded p-3 m-3">
+            Vaš profil je prazen - dodajte države, o katerih boste lahko videli vizualizacije!
+        </div>
+        %else:
+        %for country in ze_izbrane_drzave:
+        <div class="col text-start bg-dark border border-white rounded p-3 m-3">
+            {{country}}
+        </div>
+        %end
+        %end
+    </div>
+</div>
