@@ -9,9 +9,19 @@ import psycopg2.extensions
 import psycopg2.extras
 
 import Data.auth_public as auth
-from app_utils import RegistracijaUtils, DBUtils
-from bottleext import (get, post, redirect, request, response, route, run,
-                       static_file, url, template)
+from app_utils import RegistracijaUtils, DBUtils, GeneralUtils
+from bottleext import (
+    get,
+    post,
+    redirect,
+    request,
+    response,
+    route,
+    run,
+    static_file,
+    url,
+    template,
+)
 from Data.Database import Repo
 from Data.Modeli import *
 from Data.Services import AuthService
@@ -33,10 +43,22 @@ auth = AuthService(repo)
 
 
 # za ločitev med prijavo in odjavo
-def preveriZnacko():
+def preveri_znacko():
     if request.get_cookie("id", secret=SECRET_COOKIE_KEY):
         return 1
     return 0
+
+
+def preveri_uporabnika():
+    id = request.get_cookie("id", secret=SECRET_COOKIE_KEY)
+    if id:
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        try:
+            cur.execute("SELECT id FROM uporabniki WHERE id = %s", [id])
+            return DBUtils().dobi_prvi_rezultat(cur)
+        except:
+            redirect(url("prijava_get"))
+    redirect(url("prijava_get"))
 
 
 @get("/views/images/<filepath:re:.*\.(jpg|png|gif|ico|svg)>")
@@ -52,7 +74,7 @@ def static(filename):
 # zacetna stran
 @get("/", name="index")
 def index():
-    znacka = preveriZnacko()
+    znacka = preveri_znacko()
     return template("zacetna_stran.html", znacka=znacka)
 
 
@@ -75,6 +97,7 @@ def registracija_get():
     )
 
 
+# TODO (Val): Posodobi ER diagram s tabelo uporabniki
 @post("/registracija", name="registracija_post")
 def registracija_post():
     vloga = request.forms.vloga  # type: ignore
@@ -108,7 +131,8 @@ def registracija_post():
         print("Vnos v bazo...")
         # TODO: Tukaj se zalomi
         cur.execute(
-            "INSERT INTO uporabniki (ime, priimek, email, geslo, navijaska_drzava) VALUES (%s, %s, %s, %s, %s)", (ime, priimek, email, hash_gesla, navijaska_drzava),
+            "INSERT INTO uporabniki (ime, priimek, email, geslo, navijaska_drzava) VALUES (%s, %s, %s, %s, %s)",
+            (ime, priimek, email, hash_gesla, navijaska_drzava),
         )
         print("Vnos uspešen!")
 
@@ -122,32 +146,112 @@ def registracija_post():
     redirect(url("registracija_get"))
     return
 
-@get('/prijava') 
+
+@get("/prijava")
 def prijava_get():
     napaka = request.get_cookie("sporocilo")
-    return template("prijava.html", naslov = "Prijava", napaka=napaka)
+    return template("prijava.html", naslov="Prijava", napaka=napaka)
 
-@post('/prijava')
+
+@post("/prijava")
 def prijava_post():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    email = request.forms.email # type: ignore
-    geslo = request.forms.geslo # type: ignore
-    try: 
+    email = request.forms.email  # type: ignore
+    geslo = request.forms.geslo  # type: ignore
+    try:
         cur.execute("SELECT geslo FROM uporabniki WHERE email = %s", [email])
         hash_baza = DBUtils().dobi_prvi_rezultat(cur)
     except:
         response.set_cookie("sporocilo", "Elektronski naslov ne obstaja!")
-        redirect(url('prijava_get'))
+        redirect(url("prijava_get"))
         return
 
     if DBUtils.izracunaj_hash_gesla(geslo) != hash_baza:
-        response.set_cookie("sporocilo", "Ob danem elektronskem naslovu niste zapisali ustreznega gesla!")
-        redirect(url('prijava_get'))
-    
-    cur.execute('SELECT id FROM uporabniki WHERE email = %s', [email])
+        response.set_cookie(
+            "sporocilo",
+            "Ob danem elektronskem naslovu niste zapisali ustreznega gesla!",
+        )
+        redirect(url("prijava_get"))
+
+    cur.execute("SELECT id FROM uporabniki WHERE email = %s", [email])
     id_uporabnika = DBUtils().dobi_prvi_rezultat(cur)
-    response.set_cookie('id', id_uporabnika, secret=SECRET_COOKIE_KEY, path='/')
-    redirect(url('prijava_get'))
+    response.set_cookie("id", id_uporabnika, secret=SECRET_COOKIE_KEY, path="/")
+    redirect(url("uporabnik_get"))
+
+
+def pridobi_razpolozljive_drzave(cur, id_uporabnika):
+    cur.execute(
+        f"""SELECT t.team_name 
+            FROM teams t
+            WHERE NOT EXISTS (
+                SELECT 1 
+                FROM ekipe_uporabnika eu 
+                WHERE eu.team_name = t.team_name AND eu.user_id = {id_uporabnika}
+            )
+        """
+    )
+    return GeneralUtils().flatten_list(cur.fetchall())
+
+
+def pridobi_ze_izbrane_drzave(cur, id_uporabnika):
+    cur.execute(
+        f"SELECT team_name FROM ekipe_uporabnika WHERE user_id = {id_uporabnika}"
+    )
+    return GeneralUtils().flatten_list(cur.fetchall())
+
+
+# TODO (Val): Posodobi ER diagram s tabelo ekipe_uporabnika
+@get("/uporabnik")
+def uporabnik_get():
+    # TODO (Val): Predstavi stanje uporabnika
+    id_uporabnika = preveri_uporabnika()
+    znacka = preveri_znacko()
+    napaka = request.get_cookie("sporocilo")
+    razpolozljive_drzave = pridobi_razpolozljive_drzave(cur, id_uporabnika)
+    ze_izbrane_drzave = pridobi_ze_izbrane_drzave(cur, id_uporabnika)
+    return template(
+        "uporabnik.html",
+        razpolozljive_drzave=razpolozljive_drzave,
+        napaka=napaka,
+        znacka=znacka,
+        ze_izbrane_drzave=ze_izbrane_drzave,
+    )
+
+
+def dodaj_drzavo(cur, id_uporabnika, ime_dodane_drzave):
+    cur.execute(
+        f"INSERT INTO ekipe_uporabnika (team_name, user_id) VALUES ('{ime_dodane_drzave}', {id_uporabnika})"
+    )
+    conn.commit()
+    return
+
+def odstrani_drzavo(cur, id_uporabnika, ime_drzave_za_odstraniti):
+    cur.execute(
+        f"DELETE FROM ekipe_uporabnika WHERE team_name = '{ime_drzave_za_odstraniti}' AND user_id = {id_uporabnika}"
+    )
+    conn.commit()
+    return
+
+@post("/uporabnik")
+def uporabnik_post():
+    id_uporabnika = preveri_uporabnika()
+    ime_dodane_drzave = request.forms.ime_dodane_drzave
+    ime_drzave_za_odstraniti = request.forms.ime_drzave_za_odstraniti
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    error_msg = "Napaka pri vnosu v bazo!"
+
+    if ime_dodane_drzave != "":
+        try:
+            dodaj_drzavo(cur, id_uporabnika, ime_dodane_drzave)
+        except:
+            response.set_cookie("sporocilo", error_msg)
+    if ime_drzave_za_odstraniti != "":
+        try:
+            odstrani_drzavo(cur, id_uporabnika, ime_drzave_za_odstraniti)
+        except:
+            response.set_cookie("sporocilo", error_msg)
+
+    redirect(url("uporabnik_get"))
 
 
 if __name__ == "__main__":
