@@ -239,25 +239,57 @@ def odstrani_drzavo(cur, id_uporabnika, ime_drzave_za_odstraniti):
     conn.commit()
     return
 
-
-@post("/uporabnik")
-def uporabnik_post():
+@post("/uporabnik/dodaj")
+def uporabnik_post_dodaj_drzavo():
     id_uporabnika = preveri_uporabnika()
     ime_dodane_drzave = request.forms.ime_dodane_drzave
-    ime_drzave_za_odstraniti = request.forms.ime_drzave_za_odstraniti
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    error_msg = "Napaka pri vnosu v bazo!"
+
+    print("Dodajam državo", ime_dodane_drzave)
 
     if ime_dodane_drzave != "":
-        try:
-            dodaj_drzavo(cur, id_uporabnika, ime_dodane_drzave)
-        except:
-            response.set_cookie("sporocilo", error_msg)
+        # try:
+        dodaj_drzavo(cur, id_uporabnika, ime_dodane_drzave)
+        # except:
+        #     response.set_cookie("sporocilo", "Napaka pri vnosu v bazo!")
+    redirect(url("uporabnik_get"))
+
+@post("/uporabnik/dodaj_vse")
+def uporabnik_post_dodaj_vse_drzave():
+    id_uporabnika = preveri_uporabnika()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    print("Dodajam vse države")
+
+    razpolozljive_drzave = pridobi_razpolozljive_drzave(cur, id_uporabnika)
+
+    for drzava in razpolozljive_drzave:
+        dodaj_drzavo(cur, id_uporabnika, drzava)
+
+    redirect(url("uporabnik_get"))
+
+@post("/uporabnik/odstrani")
+def uporabnik_post_odstrani_drzavo():
+    id_uporabnika = preveri_uporabnika()
+    ime_drzave_za_odstraniti = request.forms.ime_drzave_za_odstraniti
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
     if ime_drzave_za_odstraniti != "":
         try:
             odstrani_drzavo(cur, id_uporabnika, ime_drzave_za_odstraniti)
         except:
-            response.set_cookie("sporocilo", error_msg)
+            response.set_cookie("sporocilo", "Napaka pri vnosu v bazo!")
+    redirect(url("uporabnik_get"))
+
+@post("/uporabnik/odstrani_vse")
+def uporabnik_post_odstrani_vse_drzave():
+    id_uporabnika = preveri_uporabnika()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    ze_izbrane_drzave = pridobi_ze_izbrane_drzave(cur, id_uporabnika)
+
+    for drzava in ze_izbrane_drzave:
+        odstrani_drzavo(cur, id_uporabnika, drzava)
 
     redirect(url("uporabnik_get"))
 
