@@ -231,12 +231,14 @@ def dodaj_drzavo(cur, id_uporabnika, ime_dodane_drzave):
     conn.commit()
     return
 
+
 def odstrani_drzavo(cur, id_uporabnika, ime_drzave_za_odstraniti):
     cur.execute(
         f"DELETE FROM ekipe_uporabnika WHERE team_name = '{ime_drzave_za_odstraniti}' AND user_id = {id_uporabnika}"
     )
     conn.commit()
     return
+
 
 @post("/uporabnik")
 def uporabnik_post():
@@ -260,26 +262,51 @@ def uporabnik_post():
     redirect(url("uporabnik_get"))
 
 
-@get('/about')
+@get("/about")
 def about():
     znacka = preveri_znacko()
-    return template("about.html", naslov='O platformi', znacka=znacka)
+    return template("about.html", naslov="O platformi", znacka=znacka)
 
 
-@get('/odjava')
+@get("/odjava")
 def odjava():
     response.delete_cookie("id")
-    redirect(url('index'))
+    redirect(url("index"))
 
-@get('/hall_of_fame')
+
+@get("/hall_of_fame")
 def hall_of_fame():
     znacka = preveri_znacko()
-    return template("hall_of_fame.html", naslov='Hall of Fame', znacka=znacka)
+    return template("hall_of_fame.html", naslov="Hall of Fame", znacka=znacka)
 
-@get('/statistike_ekip')
+
+@get("/statistike_ekip")
 def statistike_ekip():
     znacka = preveri_znacko()
-    return template("statistike_ekip.html", naslov='Statistike ekip', znacka=znacka)
+    return template("statistike_ekip.html", naslov="Statistike ekip", znacka=znacka)
+
+
+@get("/profil")
+def profil_get():
+    id_uporabnika = preveri_uporabnika()
+    znacka = preveri_znacko()
+    cur.execute(f"SELECT * FROM uporabniki WHERE id = {id_uporabnika}")
+
+    napaka = request.get_cookie("sporocilo")
+    info = ["info1", "info2", "info3", "info4", "info5", "info6", "info7"]
+    [id, ime, priimek, email, hash_gesla, navijaska_drzava] = list(cur.fetchone())
+    print([id, ime, priimek, email, hash_gesla, navijaska_drzava])
+    return template(
+        "profil.html",
+        napaka=napaka,
+        naslov="Podatki uporabnika",
+        znacka=znacka,
+        info=info,
+        ime=ime,
+        priimek=priimek,
+        email=email,
+        navijaska_drzava=navijaska_drzava,
+    )
 
 
 if __name__ == "__main__":
