@@ -1,0 +1,44 @@
+% setdefault('napaka', '')
+% setdefault('naslov', 'Moj profil')
+% setdefault('znacka', 0)
+% rebase('base.html', napaka=napaka, naslov=naslov)
+
+<div class="d-flex justify-content-center">
+    <div class="container bg-dark border border-white rounded p-3 m-3" style="width: 10cm;">
+        <div class="row p-2">
+            <div class="col text-start">
+                Ime:
+            </div>
+            <div class="col text-center">
+                {{ime}}
+            </div>
+        </div>
+        <div class="row p-2">
+            <div class="col text-start">
+                Priimek:
+            </div>
+            <div class="col text-center">
+                {{priimek}}
+            </div>
+        </div>
+        <div class="row p-2">
+            <div class="col text-start">
+                Navijaška država:
+            </div>
+            <div class="col text-center">
+                {{navijaska_drzava}}
+            </div>
+        </div>
+        <div class="row p-2">
+            <div class="col text-start">
+                Email:
+            </div>
+            <div class="col text-center">
+                {{email}}
+            </div>
+        </div>
+        <div class="row p-2">
+            TODO (Val): Mogoče dodava še formo za spremembo gesla?
+        </div>
+    </div>
+</div>

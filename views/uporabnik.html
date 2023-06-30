@@ -1,0 +1,80 @@
+% setdefault('napaka', '')
+% setdefault('znacka', 0)
+% setdefault('naslov', '')
+% rebase('base.html', napaka=napaka, naslov=naslov)
+
+<br>
+
+<div class="container">
+    <div class="row justify-content-md-center">
+        <div class="col col-lg-2">
+            <p class="h4">
+                Izbor držav
+            </p>
+        </div>
+
+        <form action="{{url('uporabnik_post_dodaj_drzavo')}}" method="post">
+            <div class="row">
+                Dodaj državo:
+                <div class="col col-lg-2">
+                    <select name="ime_dodane_drzave" class="form-select" style="width:auto;">
+                        <option value=""></option>
+                        %for el in razpolozljive_drzave:
+                        <option value='{{el}}'>{{el}}</option>
+                        %end
+                    </select>
+                </div>
+                <div class="col col-lg-2">
+                    <button type="submit" class="btn btn-outline-light btn-padding-y">Dodaj državo</button>
+                </div>
+            </div>
+        </form>
+
+        <form action="{{url('uporabnik_post_dodaj_vse_drzave')}}" method="post">
+            <div class="col col-lg-2">
+                <button type="submit" class="btn btn-outline-light btn-padding-y">Dodaj vse države</button>
+            </div>
+        </form>
+
+        <form action="{{url('uporabnik_post_odstrani_drzavo')}}" method="post">
+            <div class="row">
+                Odstrani državo:
+                <div class="col col-lg-2">
+                    <select name="ime_drzave_za_odstraniti" class="form-select" style="width:auto;">
+                        <option value=""></option>
+                        %for el in ze_izbrane_drzave:
+                        <option value='{{el}}'>{{el}}</option>
+                        %end
+                    </select>
+                </div>
+                <div class="col col-lg-2">
+                    <button type="submit" class="btn btn-outline-light btn-padding-y">Odstrani državo</button>
+                </div>
+            </div>
+        </form>
+        <form action="{{url('uporabnik_post_odstrani_vse_drzave')}}" method="post">
+            <div class="col col-lg-2">
+                <button type="submit" class="btn btn-outline-light btn-padding-y">Odstrani vse države</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<br>
+
+<div class="container">
+    <div class="row justify-content-md-center row-cols-4">
+        %if len(ze_izbrane_drzave) == 0:
+        <div class="col text-start bg-dark border border-white rounded p-3 m-3">
+            Vaš profil je prazen - dodajte države, o katerih boste lahko videli vizualizacije!
+        </div>
+        %else:
+        %for country in ze_izbrane_drzave:
+        <div class="col text-start bg-dark border border-white rounded p-3 m-3">
+            {{country}}
+        </div>
+        %end
+        %end
+    </div>
+</div>
