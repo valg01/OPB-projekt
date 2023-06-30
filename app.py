@@ -263,7 +263,7 @@ def uporabnik_post():
 @get('/about')
 def about():
     znacka = preveri_znacko()
-    return template("about.html", naslov='O podjetju', znacka=znacka)
+    return template("about.html", naslov='O platformi', znacka=znacka)
 
 if __name__ == "__main__":
     run(host="localhost", port=int(SERVER_PORT), reloader=bool(RELOADER), debug=True)
