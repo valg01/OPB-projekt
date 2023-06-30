@@ -265,5 +265,22 @@ def about():
     znacka = preveri_znacko()
     return template("about.html", naslov='O platformi', znacka=znacka)
 
+
+@get('/odjava')
+def odjava():
+    response.delete_cookie("id")
+    redirect(url('index'))
+
+@get('/hall_of_fame')
+def hall_of_fame():
+    znacka = preveri_znacko()
+    return template("hall_of_fame.html", naslov='Hall of Fame', znacka=znacka)
+
+@get('/statistike_ekip')
+def statistike_ekip():
+    znacka = preveri_znacko()
+    return template("statistike_ekip.html", naslov='Statistike ekip', znacka=znacka)
+
+
 if __name__ == "__main__":
     run(host="localhost", port=int(SERVER_PORT), reloader=bool(RELOADER), debug=True)

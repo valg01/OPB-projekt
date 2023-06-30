@@ -15,17 +15,25 @@
 
     <nav class="navbar navbar-dark bg-dark">
         <div class="container-fluid">
-            <!-- TODO: Dodaj dodatne gumbe tukaj -->
             <div class="container-fluid">
-                %if znacka == 0:
                 <div class="container">
-                    <a class="navbar-brand" href="{{url('index')}}">
+                    <a class="navbar-brand" href="{{url('index') if znacka == 0 else url('uporabnik_get')}}">
                         <img src="{{url('static', filename= '/img/logo.png')}}" alt="Zacetna stran" width="70"
                             height="70">
                     </a>
+                    <a class="navbar-brand" href="{{url('about')}}">O platformi</a>
+                    <a class="navbar-brand" href="{{url('hall_of_fame')}}">Hall of fame</a>
+                    <a class="navbar-brand" href="{{url('statistike_ekip')}}">Statistike ekip</a>
+                    %if znacka == 0:
+                    <a class="navbar-brand" href="{{url('prijava_get')}}">Prijava</a>
+                    % else:
+                    <a class="navbar-brand" href="{{url('uporabnik_get')}}">Uporabnik</a>
+                    <a class="navbar-brand" href="{{url('odjava')}}">Odjava</a>
+                    %end
+
                 </div>
-                %end
-                <!-- TODO: Obravnavaj, če znacka != 0 -->
+
+
             </div>
         </div>
     </nav>
@@ -140,6 +148,10 @@
                         <ul class="list-unstyled mb-0">
                             <li>
                                 <a class="text-white" href="{{url('about')}}">O platformi</a>
+                                <br>
+                                <a class="text-white" href="{{url('hall_of_fame')}}">Hall of fame</a>
+                                <br>
+                                <a class="text-white" href="{{url('statistike_ekip')}}">Statistike ekip</a>
                             </li>
                         </ul>
                     </div>
@@ -151,7 +163,8 @@
                                     class="text-white">svetovna.prvenstva@fifa.com</a>
                             </li>
                             <li>
-                                <a href="https://www.fifa.com/fifaplus/en" class="text-white">FIFA - glavni sponzor te platforme</a>
+                                <a href="https://www.fifa.com/fifaplus/en" class="text-white">FIFA - glavni sponzor te
+                                    platforme</a>
                             </li>
                         </ul>
                     </div>
