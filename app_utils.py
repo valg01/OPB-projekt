@@ -2,14 +2,14 @@ import hashlib
 
 
 class DBUtils:
-
     @staticmethod
     def dobi_prvi_rezultat(cur):
         return cur.fetchone()[0]
-    
+
     @staticmethod
     def izracunaj_hash_gesla(geslo):
         return hashlib.sha256(geslo.encode()).hexdigest()
+
 
 class RegistracijaUtils:
     @staticmethod
@@ -23,7 +23,6 @@ class RegistracijaUtils:
                 return False
         except:
             return False
-
 
     @staticmethod
     def _gesli_enaki(geslo, ponovljeno_geslo):
@@ -45,3 +44,8 @@ class RegistracijaUtils:
         else:
             return (True, "")
 
+
+class GeneralUtils:
+    @staticmethod
+    def flatten_list(l):
+        return [item for sublist in l for item in sublist]

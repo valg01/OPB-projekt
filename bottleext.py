@@ -35,9 +35,7 @@ def template(*largs, **kwargs):
     """
     Izpis predloge s podajanjem funkcije url.
     """
-    return bottle.template(
-        *largs, **kwargs, url=bottle.url
-    )
+    return bottle.template(*largs, **kwargs, url=bottle.url)
 
 
 bottle.Route = Route
