@@ -86,11 +86,17 @@ def dobi_vse_drzave(cur):
 @get("/registracija", name="registracija_get")
 def registracija_get():
     napaka = request.get_cookie("sporocilo")
-    vloga = request.get_cookie("vloga")
-    ime = request.get_cookie("ime")
-    priimek = request.get_cookie("priimek")
-    email = request.get_cookie("email", "_")
+    print("napaka: ", napaka)
+    vloga = request.get_cookie("vloga", secret=SECRET_COOKIE_KEY)
+    ime = request.get_cookie("ime", secret=SECRET_COOKIE_KEY)
+    priimek = request.get_cookie("priimek", secret=SECRET_COOKIE_KEY)
+    email = request.get_cookie("email", secret=SECRET_COOKIE_KEY)
     navijaska_drzava = request.get_cookie("navijaska_drzava")
+    try:
+        vse_mozne_drzave = dobi_vse_drzave(cur)
+    except Exception as e:
+        print(e)
+        vse_mozne_drzave = []
     return template(
         "registracija.html",
         napaka=napaka,
@@ -99,7 +105,7 @@ def registracija_get():
         priimek=priimek,
         navijaska_drzava=navijaska_drzava,
         email=email,
-        vse_mozne_drzave=dobi_vse_drzave(cur),
+        vse_mozne_drzave=vse_mozne_drzave,
     )
 
 
@@ -134,16 +140,14 @@ def registracija_post():
     hash_gesla = DBUtils.izracunaj_hash_gesla(geslo)
 
     try:
-        print("Vnos v bazo...")
         # TODO: Tukaj se zalomi
         cur.execute(
-            "INSERT INTO uporabniki (ime, priimek, email, geslo, navijaska_drzava) VALUES (%s, %s, %s, %s, %s)",
-            (ime, priimek, email, hash_gesla, navijaska_drzava),
+            "INSERT INTO uporabniki (ime, priimek, email, geslo, navijaska_drzava, vloga) VALUES (%s, %s, %s, %s, %s, %s)",
+            (ime, priimek, email, hash_gesla, navijaska_drzava, vloga),
         )
-        print("Vnos uspešen!")
-
-        id_uporabnika = DBUtils().dobi_prvi_rezultat(cur)
         conn.commit()
+        id_uporabnika = DBUtils().dobi_prvi_rezultat(cur)
+
         print("Vnos uspešen!")
         response.set_cookie("id", id_uporabnika, path="/", secret=SECRET_COOKIE_KEY)
     except:
@@ -303,6 +307,12 @@ def about():
 @get("/odjava")
 def odjava():
     response.delete_cookie("id")
+    response.delete_cookie("vloga")
+    response.delete_cookie("navijaska_drzava")
+    response.delete_cookie("sporocilo")
+    response.delete_cookie("ime")
+    response.delete_cookie("priimek")
+    response.delete_cookie("email")
     redirect(url("index"))
 
 
