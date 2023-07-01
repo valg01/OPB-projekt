@@ -327,8 +327,7 @@ def profil_get():
     znacka = preveri_znacko()
     cur.execute(f"SELECT * FROM uporabniki WHERE id = {id_uporabnika}")
     napaka = request.get_cookie("sporocilo")
-    [id, ime, priimek, email, hash_gesla, navijaska_drzava] = list(cur.fetchone())
-    print([id, ime, priimek, email, hash_gesla, navijaska_drzava])
+    [id, ime, priimek, email, hash_gesla, navijaska_drzava, vloga] = list(cur.fetchone())
     return template(
         "profil.html",
         napaka=napaka,
@@ -338,6 +337,7 @@ def profil_get():
         priimek=priimek,
         email=email,
         navijaska_drzava=navijaska_drzava,
+        vloga=vloga
     )
 
 
