@@ -1,4 +1,5 @@
 import hashlib
+from psycopg2 import Error
 
 
 class DBUtils:
@@ -15,14 +16,16 @@ class RegistracijaUtils:
     @staticmethod
     def _email_ze_obstaja_q(email, cur):
         try:
-            cur.execute(f"SELECT * FROM uporabnik WHERE email = {email}")
+            cur.execute("SELECT * FROM uporabniki WHERE email = %s", (email,))
             data = cur.fetchall()
             if data != []:
                 return True
             else:
                 return False
-        except:
+        except Error as e:
+            print(f"An error occurred: {e}")
             return False
+
 
     @staticmethod
     def _gesli_enaki(geslo, ponovljeno_geslo):
