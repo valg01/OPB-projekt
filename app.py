@@ -86,17 +86,11 @@ def dobi_vse_drzave(cur):
 @get("/registracija", name="registracija_get")
 def registracija_get():
     napaka = request.get_cookie("sporocilo")
-    print("napaka: ", napaka)
     vloga = request.get_cookie("vloga", secret=SECRET_COOKIE_KEY)
     ime = request.get_cookie("ime", secret=SECRET_COOKIE_KEY)
     priimek = request.get_cookie("priimek", secret=SECRET_COOKIE_KEY)
     email = request.get_cookie("email", secret=SECRET_COOKIE_KEY)
     navijaska_drzava = request.get_cookie("navijaska_drzava")
-    try:
-        vse_mozne_drzave = dobi_vse_drzave(cur)
-    except Exception as e:
-        print(e)
-        vse_mozne_drzave = []
     return template(
         "registracija.html",
         napaka=napaka,
@@ -105,7 +99,7 @@ def registracija_get():
         priimek=priimek,
         navijaska_drzava=navijaska_drzava,
         email=email,
-        vse_mozne_drzave=vse_mozne_drzave,
+        vse_mozne_drzave=dobi_vse_drzave(cur),
     )
 
 
@@ -142,19 +136,18 @@ def registracija_post():
     try:
         # TODO: Tukaj se zalomi
         cur.execute(
-            "INSERT INTO uporabniki (ime, priimek, email, geslo, navijaska_drzava, vloga) VALUES (%s, %s, %s, %s, %s, %s)",
+            "INSERT INTO uporabniki (ime, priimek, email, geslo, navijaska_drzava, vloga) VALUES (%s, %s, %s, %s, %s, %s) RETURNING id",
             (ime, priimek, email, hash_gesla, navijaska_drzava, vloga),
         )
-        conn.commit()
         id_uporabnika = DBUtils().dobi_prvi_rezultat(cur)
+        conn.commit()
 
         print("Vnos uspešen!")
         response.set_cookie("id", id_uporabnika, path="/", secret=SECRET_COOKIE_KEY)
-    except:
+    except IndexError:
         response.set_cookie("sporocilo", "Napaka pri vnosu v bazo!")
 
-    redirect(url("registracija_get"))
-    return
+    redirect(url("uporabnik_get"))
 
 
 @get("/prijava")
