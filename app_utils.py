@@ -26,7 +26,6 @@ class RegistracijaUtils:
             print(f"An error occurred: {e}")
             return False
 
-
     @staticmethod
     def _gesli_enaki(geslo, ponovljeno_geslo):
         return geslo == ponovljeno_geslo

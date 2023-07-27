@@ -44,12 +44,19 @@ auth = AuthService(repo)
 
 # za ločitev med prijavo in odjavo
 def preveri_znacko():
+    """
+    Checks if the user has a valid session cookie and returns 1 if they do, 0 otherwise.
+    """
     if request.get_cookie("id", secret=SECRET_COOKIE_KEY):
         return 1
     return 0
 
 
 def preveri_uporabnika():
+    """
+    Checks if the user has a valid session cookie and returns the user's ID if they do.
+    If the user does not have a valid session cookie, redirects them to the login page.
+    """
     id = request.get_cookie("id", secret=SECRET_COOKIE_KEY)
     if id:
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -63,28 +70,67 @@ def preveri_uporabnika():
 
 @get("/views/images/<filepath:re:.*\.(jpg|png|gif|ico|svg)>")
 def img(filepath):
+    """
+    Returns the static file with the given filepath from the 'views/images' directory.
+
+    Args:
+        filepath (str): The filepath of the static file to be returned.
+
+    Returns:
+        The static file with the given filepath from the 'views/images' directory.
+    """
     return static_file(filepath, root="views/images")
 
 
 @route("/static/<filename:path>", name="static")
 def static(filename):
+    """
+    Returns the static file with the given filename from the 'static' directory.
+
+    Args:
+        filename (str): The filename of the static file to be returned.
+
+    Returns:
+        The static file with the given filename from the 'static' directory.
+    """
     return static_file(filename, root=static_dir)
 
 
 # zacetna stran
 @get("/", name="index")
 def index():
+    """
+    Renders the home page template with the appropriate tag.
+
+    Returns:
+        The rendered home page template with the appropriate tag.
+    """
     znacka = preveri_znacko()
     return template("zacetna_stran.html", znacka=znacka)
 
 
 def dobi_vse_drzave(cur):
+    """
+    Returns a list of all team names from the 'teams' table.
+
+    Args:
+        cur (psycopg2.extensions.cursor): The cursor object used to execute the SQL query.
+
+    Returns:
+        A list of all team names from the 'teams' table.
+    """
     cur.execute("SELECT team_name FROM teams")
     return GeneralUtils().flatten_list(cur.fetchall())
 
 
 @get("/registracija", name="registracija_get")
 def registracija_get():
+    """
+    Renders the registration page template with the appropriate tags and cookies.
+
+    Returns:
+        The rendered registration page template with the appropriate tags and cookies.
+    """
     napaka = request.get_cookie("sporocilo")
     vloga = request.get_cookie("vloga", secret=SECRET_COOKIE_KEY)
     ime = request.get_cookie("ime", secret=SECRET_COOKIE_KEY)
@@ -105,7 +151,14 @@ def registracija_get():
 
 # TODO (Val): Posodobi ER diagram s tabelo uporabniki
 @post("/registracija", name="registracija_post")
+@post("/registracija", name="registracija_post")
 def registracija_post():
+    """
+    Handles the registration form submission by validating the input data and inserting a new user into the database.
+
+    Returns:
+        Redirects the user to the appropriate page based on the success or failure of the registration process.
+    """
     vloga = request.forms.vloga  # type: ignore
     ime = request.forms.ime  # type: ignore
     priimek = request.forms.priimek  # type: ignore
@@ -134,7 +187,6 @@ def registracija_post():
     hash_gesla = DBUtils.izracunaj_hash_gesla(geslo)
 
     try:
-        # TODO: Tukaj se zalomi
         cur.execute(
             "INSERT INTO uporabniki (ime, priimek, email, geslo, navijaska_drzava, vloga) VALUES (%s, %s, %s, %s, %s, %s) RETURNING id",
             (ime, priimek, email, hash_gesla, navijaska_drzava, vloga),
@@ -152,12 +204,26 @@ def registracija_post():
 
 @get("/prijava")
 def prijava_get():
+    """
+    Renders the login page template with an optional error message.
+
+    Returns:
+        The rendered login page template with an optional error message.
+    """
     napaka = request.get_cookie("sporocilo")
     return template("prijava.html", naslov="Prijava", napaka=napaka)
 
 
 @post("/prijava")
 def prijava_post():
+    """
+    Authenticates the user by checking their email and password against the database.
+    If the email or password is incorrect, sets a cookie with an error message and redirects to the login page.
+    If the email and password are correct, sets a cookie with the user's ID and redirects to the user page.
+
+    Returns:
+        None
+    """
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     email = request.forms.email  # type: ignore
     geslo = request.forms.geslo  # type: ignore
@@ -183,6 +249,16 @@ def prijava_post():
 
 
 def pridobi_razpolozljive_drzave(cur, id_uporabnika):
+    """
+    Retrieves a list of available teams that the user has not yet selected.
+
+    Args:
+        cur: The database cursor.
+        id_uporabnika: The ID of the user.
+
+    Returns:
+        A list of available teams that the user has not yet selected.
+    """
     cur.execute(
         f"""SELECT t.team_name 
             FROM teams t
@@ -197,6 +273,16 @@ def pridobi_razpolozljive_drzave(cur, id_uporabnika):
 
 
 def pridobi_ze_izbrane_drzave(cur, id_uporabnika):
+    """
+    Retrieves a list of teams that the user has already selected.
+
+    Args:
+        cur: The database cursor.
+        id_uporabnika: The ID of the user.
+
+    Returns:
+        A list of teams that the user has already selected.
+    """
     cur.execute(
         f"SELECT team_name FROM ekipe_uporabnika WHERE user_id = {id_uporabnika}"
     )
@@ -206,6 +292,12 @@ def pridobi_ze_izbrane_drzave(cur, id_uporabnika):
 # TODO (Val): Posodobi ER diagram s tabelo ekipe_uporabnika
 @get("/uporabnik")
 def uporabnik_get():
+    """
+    Retrieves the current user's information and displays it on the user profile page.
+
+    Returns:
+        A rendered HTML template of the user profile page.
+    """
     # TODO (Val): Predstavi stanje uporabnika
     id_uporabnika = preveri_uporabnika()
     znacka = preveri_znacko()
@@ -222,6 +314,17 @@ def uporabnik_get():
 
 
 def dodaj_drzavo(cur, id_uporabnika, ime_dodane_drzave):
+    """
+    Adds a selected team to the user's list of selected teams.
+
+    Args:
+        cur: The database cursor.
+        id_uporabnika: The ID of the user.
+        ime_dodane_drzave: The name of the team to be added.
+
+    Returns:
+        None.
+    """
     cur.execute(
         f"INSERT INTO ekipe_uporabnika (team_name, user_id) VALUES ('{ime_dodane_drzave}', {id_uporabnika})"
     )
@@ -230,33 +333,57 @@ def dodaj_drzavo(cur, id_uporabnika, ime_dodane_drzave):
 
 
 def odstrani_drzavo(cur, id_uporabnika, ime_drzave_za_odstraniti):
+    """
+    Removes a selected team from the user's list of selected teams.
+
+    Args:
+        cur: The database cursor.
+        id_uporabnika: The ID of the user.
+        ime_drzave_za_odstraniti: The name of the team to be removed.
+
+    Returns:
+        None.
+    """
     cur.execute(
         f"DELETE FROM ekipe_uporabnika WHERE team_name = '{ime_drzave_za_odstraniti}' AND user_id = {id_uporabnika}"
     )
     conn.commit()
     return
 
+
 @post("/uporabnik/dodaj")
 def uporabnik_post_dodaj_drzavo():
+    """
+    Adds a selected team to the user's list of selected teams.
+
+    Args:
+        None.
+
+    Returns:
+        None.
+    """
     id_uporabnika = preveri_uporabnika()
-    ime_dodane_drzave = request.forms.ime_dodane_drzave
+    ime_dodane_drzave = request.forms.ime_dodane_drzave  # type: ignore
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
     print("Dodajam državo", ime_dodane_drzave)
-
     if ime_dodane_drzave != "":
-        # try:
         dodaj_drzavo(cur, id_uporabnika, ime_dodane_drzave)
-        # except:
-        #     response.set_cookie("sporocilo", "Napaka pri vnosu v bazo!")
     redirect(url("uporabnik_get"))
+
 
 @post("/uporabnik/dodaj_vse")
 def uporabnik_post_dodaj_vse_drzave():
+    """
+    Adds all available teams to the user's list of selected teams.
+
+    Args:
+        None.
+
+    Returns:
+        None.
+    """
     id_uporabnika = preveri_uporabnika()
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-
-    print("Dodajam vse države")
 
     razpolozljive_drzave = pridobi_razpolozljive_drzave(cur, id_uporabnika)
 
@@ -265,10 +392,20 @@ def uporabnik_post_dodaj_vse_drzave():
 
     redirect(url("uporabnik_get"))
 
+
 @post("/uporabnik/odstrani")
 def uporabnik_post_odstrani_drzavo():
+    """
+    Removes a selected team from the user's list of selected teams.
+
+    Args:
+        None.
+
+    Returns:
+        None.
+    """
     id_uporabnika = preveri_uporabnika()
-    ime_drzave_za_odstraniti = request.forms.ime_drzave_za_odstraniti
+    ime_drzave_za_odstraniti = request.forms.ime_drzave_za_odstraniti  # type: ignore
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     if ime_drzave_za_odstraniti != "":
@@ -278,8 +415,18 @@ def uporabnik_post_odstrani_drzavo():
             response.set_cookie("sporocilo", "Napaka pri vnosu v bazo!")
     redirect(url("uporabnik_get"))
 
+
 @post("/uporabnik/odstrani_vse")
 def uporabnik_post_odstrani_vse_drzave():
+    """
+    Removes all selected teams from the user's list of selected teams.
+
+    Args:
+        None.
+
+    Returns:
+        None.
+    """
     id_uporabnika = preveri_uporabnika()
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
@@ -293,12 +440,30 @@ def uporabnik_post_odstrani_vse_drzave():
 
 @get("/about")
 def about():
+    """
+    Renders the about page of the platform.
+
+    Args:
+        None.
+
+    Returns:
+        A rendered HTML template of the about page.
+    """
     znacka = preveri_znacko()
     return template("about.html", naslov="O platformi", znacka=znacka)
 
 
 @get("/odjava")
 def odjava():
+    """
+    Logs out the user by deleting all cookies related to the user's session.
+
+    Args:
+        None.
+
+    Returns:
+        None.
+    """
     response.delete_cookie("id")
     response.delete_cookie("vloga")
     response.delete_cookie("navijaska_drzava")
@@ -311,23 +476,50 @@ def odjava():
 
 @get("/hall_of_fame")
 def hall_of_fame():
+    """
+    Renders the hall of fame page of the platform.
+
+    Args:
+        None.
+
+    Returns:
+        A rendered HTML template of the hall of fame page.
+    """
     znacka = preveri_znacko()
     return template("hall_of_fame.html", naslov="Hall of Fame", znacka=znacka)
 
 
 @get("/statistike_ekip")
 def statistike_ekip():
+    """
+    Renders the statistics page for teams.
+
+    Args:
+        None.
+
+    Returns:
+        A rendered HTML template of the statistics page for teams.
+    """
     znacka = preveri_znacko()
     return template("statistike_ekip.html", naslov="Statistike ekip", znacka=znacka)
 
 
 @get("/profil")
 def profil_get():
+    """
+    Renders the profile page of the user.
+
+    Args:
+        None.
+
+    Returns:
+        A rendered HTML template of the profile page of the user.
+    """
     id_uporabnika = preveri_uporabnika()
     znacka = preveri_znacko()
     cur.execute(f"SELECT * FROM uporabniki WHERE id = {id_uporabnika}")
     napaka = request.get_cookie("sporocilo")
-    [id, ime, priimek, email, hash_gesla, navijaska_drzava, vloga] = list(cur.fetchone())
+    [id, ime, priimek, email, hash_gesla, navijaska_drzava, vloga] = list(cur.fetchone())  # type: ignore
     return template(
         "profil.html",
         napaka=napaka,
@@ -337,7 +529,7 @@ def profil_get():
         priimek=priimek,
         email=email,
         navijaska_drzava=navijaska_drzava,
-        vloga=vloga
+        vloga=vloga,
     )
 
 
