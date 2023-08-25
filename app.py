@@ -41,6 +41,9 @@ static_dir = "./static"
 repo = Repo()
 auth = AuthService(repo)
 
+"""@get('/graphs/<ime>.html')
+def graf_assets(ime: str):
+    return template(f'graphs/{ime}.html')"""
 
 # za ločitev med prijavo in odjavo
 def preveri_znacko():
@@ -489,6 +492,34 @@ def hall_of_fame():
     return template("hall_of_fame.html", naslov="Hall of Fame", znacka=znacka)
 
 
+@get("/turnerji")
+def turnerji():
+    """
+    Renders the statistics page for teams.
+
+    Args:
+        None.
+
+    Returns:
+        A rendered HTML template of the statistics page for teams.
+    """
+    znacka = preveri_znacko()
+    return template("turnerji.html", naslov="Turnerji", znacka=znacka)
+
+@get("/drzave")
+def drzave():
+    """
+    Renders the statistics page for teams.
+
+    Args:
+        None.
+
+    Returns:
+        A rendered HTML template of the statistics page for teams.
+    """
+    znacka = preveri_znacko()
+    return template("drzave.html", naslov="Države", znacka=znacka)
+
 @get("/statistike_ekip")
 def statistike_ekip():
     """
@@ -502,6 +533,20 @@ def statistike_ekip():
     """
     znacka = preveri_znacko()
     return template("statistike_ekip.html", naslov="Statistike ekip", znacka=znacka)
+
+@get("/igralci")
+def igralci():
+    """
+    Renders the statistics page for teams.
+
+    Args:
+        None.
+
+    Returns:
+        A rendered HTML template of the statistics page for teams.
+    """
+    znacka = preveri_znacko()
+    return template("igralci.html", naslov="igralci", znacka=znacka)
 
 
 @get("/profil")
@@ -532,6 +577,76 @@ def profil_get():
         vloga=vloga,
     )
 
+@get("/wins")
+def wins():
+    return template(f'graphs/top_wins.html')
+
+@get("/app")
+def app():
+    return template(f'graphs/top_app.html')
+
+@get("/goals")
+def goals():
+    return template(f'graphs/top_goals.html')
+
+###########turnerji:
+@get("/red_cards")
+def rc():
+    return template(f'graphs/red_cards.html')
+
+@get("/goals_tour")
+def goals_t():
+    return template(f'graphs/goals_tour.html')
+
+@get("/goals_scored_in")
+def goals_in():
+    return template(f'graphs/goals_country.html')
+
+@get("/matches_tour")
+def matches_tour():
+    return template(f'graphs/matches_tour.html')
+
+#######Države
+@get("/tour_c")
+def tour_c():
+    return template(f'graphs/tour_country.html')
+
+@get("/awards_country")
+def award_country():
+    return template(f'graphs/awards_c.html')
+
+@get("/age_tournament")
+def age_t():
+    return template(f'graphs/age_t.html')
+
+@get("/goals_country")
+def goals_country():
+    return template(f'graphs/goals_c.html')
+
+@get("/position")
+def position():
+    return template(f'graphs/position.html')
+
+#####Igralci
+
+@get("/goals_p")
+def goals_p():
+    return template(f'graphs/goals_p.html')
+
+@get("/bookings_p")
+def bookings_p():
+    return template(f'graphs/bookings_p.html')
+
+@get("/awards_p")
+def awards_p():
+    return template(f'graphs/awards_p.html')
+
+@get("/scatter_p")
+def scatter_p():
+    return template(f'graphs/scatter_p.html')
+
 
 if __name__ == "__main__":
     run(host="localhost", port=int(SERVER_PORT), reloader=bool(RELOADER), debug=True)
+
+

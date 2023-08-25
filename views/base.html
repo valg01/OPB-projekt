@@ -13,6 +13,10 @@
         {{naslov}}
     </title>
 
+    
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    
+
     <nav class="navbar navbar-dark bg-dark">
         <div class="container-fluid">
             <div class="container-fluid">
@@ -23,7 +27,9 @@
                     </a>
                     <a class="navbar-brand" href="{{url('about')}}">O platformi</a>
                     <a class="navbar-brand" href="{{url('hall_of_fame')}}">Hall of fame</a>
-                    <a class="navbar-brand" href="{{url('statistike_ekip')}}">Statistike ekip</a>
+                    <a class="navbar-brand" href="{{url('/turnerji')}}">Turnerji</a>
+                    <a class="navbar-brand" href="{{url('/drzave')}}">Države</a>
+                    <a class="navbar-brand" href="{{url('/igralci')}}">Igralci</a>
                     %if znacka == 0:
                     <a class="navbar-brand" href="{{url('prijava_get')}}">Prijava</a>
                     <a class="navbar-brand" href="{{url('registracija_get')}}">Registracija</a>

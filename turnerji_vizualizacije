@@ -1,0 +1,117 @@
+##turnerji priprava vizualizacij
+
+import random
+
+import pandas as pd
+import plotly.graph_objects as go
+import psycopg2
+import plotly.express as px
+
+import Data.auth_public as auth
+
+connection = auth.connect()
+folder_path = "/Users/valgroleger/Svetovna-prvenstva-v-nogometu/views/graphs"
+
+
+red_cards = """SELECT LEFT(t.tournament_name, 4) AS tournament, count(b.booking_id) AS nm_bookings FROM bookings b
+JOIN tournaments t ON t.tournament_id = b.tournament_id
+GROUP BY tournament_name, b.red_card
+HAVING b.red_card = 'True'
+ORDER BY tournament_name;"""
+
+df1 = pd.read_sql_query(red_cards, connection)
+
+fig1 = go.Figure()
+
+fig1.add_trace(
+    go.Scatter(
+        x=df1["tournament"],
+        y=df1["nm_bookings"],
+        mode="lines",
+        name="Line",
+        line=dict(color="red"),
+    )
+)
+
+fig1.update_layout(
+    title="Number of red cards per tournament",
+    xaxis_title="Year",
+    yaxis_title="Number of red cards",
+)
+
+file_path1 = f"{folder_path}/red_cards.html"
+fig1.write_html(file_path1, include_plotlyjs="cdn")
+
+goals_tournaments = """
+SELECT t.tournament_name, count(g.goal_id) AS numOfGoals FROM GOALS g
+JOIN tournaments t ON t.tournament_id = g.tournament_id
+GROUP BY t.tournament_name
+ORDER BY t.tournament_name ASC;
+"""
+
+df2 = pd.read_sql_query(goals_tournaments,connection)
+
+fig2 = go.Figure()
+
+fig2.add_trace(
+    go.Pie(
+        labels=df2["tournament_name"],
+        values=df2["numofgoals"],
+        title= "Number of goals per tournament",
+        hole= 0.82
+    )
+)
+
+file_path2 = f"{folder_path}/goals_tour.html"
+fig2.write_html(file_path2, include_plotlyjs="cdn")
+
+goals_stadium_country = """SELECT s.city_name as city, s.country_name as country, COUNT(DISTINCT g.goal_id) as numOfGoals
+from stadiums s
+join matches m on m.stadium_id = s.stadium_id
+JOIN goals g on g.match_id = m.match_id
+GROUP BY s.city_name, s.country_name
+ORDER BY numOfGoals DESC ;
+"""
+
+df3 = pd.read_sql_query(goals_stadium_country, connection)
+
+fig3 = px.treemap(
+        df3,
+        path=["country", "city"],
+        values=df3["numofgoals"]
+    )
+
+fig3.update_layout(
+    title="Goals scored in city and country",
+    margin=dict(t=40, l=0, r=0, b=0),
+)
+
+file_path3 = f"{folder_path}/goals_country.html"
+fig3.write_html(file_path3, include_plotlyjs="cdn")
+
+matches_tournament = """
+SELECT t.tournament_name, count(m.match_id) as numOfMatches from matches m
+join tournaments t on t.tournament_id = m.tournament_id
+GROUP BY t.tournament_name
+ORDER BY t.tournament_name;
+"""
+
+df4 = pd.read_sql_query(matches_tournament, connection)
+
+fig4 = go.Figure()
+
+fig4.add_trace(
+    go.Bar(
+        y=df4["tournament_name"],
+        x=df4["numofmatches"],
+        orientation="h"
+    )
+)
+fig4.update_layout(
+    title = "Matches by tournament"
+)
+
+file_path4 = f"{folder_path}/matches_tour.html"
+fig4.write_html(file_path4, include_plotlyjs="cdn")
+
+##Dodaj še turnerje kjer je zmagovalec bil gostitelj -- razmišli kako bi to prikazal
