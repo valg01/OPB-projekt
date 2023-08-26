@@ -620,7 +620,7 @@ def goals():
 
 
 @get("/cs")
-def goals():
+def cs():
     return template(f"graphs/top_cs.html")
 
 
