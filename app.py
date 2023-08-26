@@ -28,7 +28,7 @@ from bottleext import (
 from Data.Database import Repo
 from Data.Modeli import *
 from Data.Services import AuthService
-from pandas import pd
+import pandas as pd
 
 # problem s šumniki
 psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
