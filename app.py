@@ -589,6 +589,10 @@ def app():
 def goals():
     return template(f'graphs/top_goals.html')
 
+@get("/cs")
+def goals():
+    return template(f'graphs/top_cs.html')
+
 ###########turnerji:
 @get("/red_cards")
 def rc():
