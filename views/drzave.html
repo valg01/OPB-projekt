@@ -3,6 +3,25 @@
 % setdefault('znacka', 0)
 % rebase('base.html', napaka=napaka, naslov=naslov)
 
+<body>
+    <style>
+        .grid-container {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          grid-template-rows: repeat(3, 1fr);
+          gap: 10px;
+          height: 1000px;
+        }
+    
+        iframe{
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    
+    </style>
+
+<div class="grid-container">
 <iframe id="igraph1" scrolling="no" seamless="seamless" src="{{url('/tour_c')}}" height="50%" width="50%"></iframe>
 
 <iframe id="igraph2" scrolling="no" seamless="seamless" src="{{url('/awards_country')}}" height="50%" width="50%"></iframe>
@@ -12,3 +31,5 @@
 <iframe id="igraph4" scrolling="no" seamless="seamless" src="{{url('/goals_country')}}" height="50%" width="50%"></iframe>
 
 <iframe id="igraph5" scrolling="no" seamless="seamless" src="{{url('/position')}}" height="50%" width="50%"></iframe>
+</div>
+</body>

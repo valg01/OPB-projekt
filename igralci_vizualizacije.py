@@ -33,6 +33,12 @@ fig1.add_trace(
         y = df1["goals"]
     )
 )
+
+fig1.update_layout(
+    margin=dict(l=0,r=0,b=0,t=0),
+    paper_bgcolor = "#C5C6D0"
+)
+
 file_path1 = f"{folder_path}/goals_p.html"
 fig1.write_html(file_path1, include_plotlyjs="cdn")
 """
@@ -122,6 +128,11 @@ fig2.update_layout(
     showlegend=True
 )
 
+fig2.update_layout(
+    margin=dict(l=0,r=0,b=0,t=0),
+    paper_bgcolor = "#C5C6D0"
+)
+
 file_path2 = f"{folder_path}/bookings_p.html"
 fig2.write_html(file_path2, include_plotlyjs="cdn")
 
@@ -140,6 +151,11 @@ order by num_of_awards DESC;
 df3 = pd.read_sql_query(players_awards, connection)
 
 fig3 = px.treemap(df3, path=["confederation_code","team_name", "player_name"], values=df3["num_of_awards"])
+
+fig3.update_layout(
+    margin=dict(l=0,r=0,b=0,t=0),
+    paper_bgcolor = "#C5C6D0"
+)
 
 file_path3 = f"{folder_path}/awards_p.html"
 fig3.write_html(file_path3, include_plotlyjs="cdn")
@@ -165,6 +181,11 @@ ORDER BY age_group ASC, GOALS desc;
 df4 = pd.read_sql_query(age_goals, connection)
 
 fig4 = px.scatter(df4, x = "average_age", y = "appearances",  trendline="ols",color = "goals", size="goals", hover_data="player_name")
+
+fig4.update_layout(
+    margin=dict(l=0,r=0,b=0,t=0),
+    paper_bgcolor = "#C5C6D0"
+)
 
 file_path4 = f"{folder_path}/scatter_p.html"
 fig4.write_html(file_path4, include_plotlyjs="cdn")

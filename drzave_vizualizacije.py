@@ -31,6 +31,11 @@ fig1.update_layout(
     margin=dict(t=40, l=0, r=0, b=0),
 )
 
+fig1.update_layout(
+    margin=dict(l=0,r=0,b=0,t=0),
+    paper_bgcolor = "#C5C6D0"
+)
+
 file_path1 = f"{folder_path}/tour_country.html"
 fig1.write_html(file_path1, include_plotlyjs="cdn")
 
@@ -68,6 +73,10 @@ fig2.update_layout(
     yaxis_title="Number of awards",
     barmode='stack',
 )
+fig2.update_layout(
+    margin=dict(l=0,r=0,b=0,t=0),
+    paper_bgcolor = "#C5C6D0"
+)
 
 file_path2 = f"{folder_path}/awards_c.html"
 fig2.write_html(file_path2, include_plotlyjs="cdn")
@@ -99,6 +108,12 @@ fig3.update_layout(
     xaxis=dict(type='category'),  # Use categorical x-axis
     showlegend=True
 )
+
+fig3.update_layout(
+    margin=dict(l=0,r=0,b=0,t=0),
+    paper_bgcolor = "#C5C6D0"
+)
+
 file_path3 = f"{folder_path}/age_t.html"
 fig3.write_html(file_path3, include_plotlyjs="cdn")
 
@@ -129,6 +144,11 @@ fig4.add_trace(
 
 fig4.update_layout(
     showlegend = False
+)
+
+fig4.update_layout(
+    margin=dict(l=0,r=0,b=0,t=0),
+    paper_bgcolor = "#C5C6D0"
 )
 
 file_path4 = f"{folder_path}/goals_c.html"
@@ -194,6 +214,11 @@ fig5.update_layout(
     yaxis_title="Number of Occurrences",
     barmode='stack',
     showlegend=True
+)
+
+fig5.update_layout(
+    margin=dict(l=0,r=0,b=0,t=0),
+    paper_bgcolor = "#C5C6D0"
 )
 
 file_path5 = f"{folder_path}/position.html"

@@ -4,6 +4,9 @@
 import os
 from functools import wraps
 
+import plotly.graph_objects as go
+import plotly.express as px
+
 import psycopg2
 import psycopg2.extensions
 import psycopg2.extras
@@ -25,11 +28,14 @@ from bottleext import (
 from Data.Database import Repo
 from Data.Modeli import *
 from Data.Services import AuthService
+from pandas import pd
 
 # problem s šumniki
 psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
 conn = auth.connect()
 cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+folder_path = "/Users/valgroleger/Svetovna-prvenstva-v-nogometu/views/graphs"
 
 SERVER_PORT = os.environ.get("BOTTLE_PORT", 8080)
 RELOADER = os.environ.get("BOTTLE_RELOADER", True)
@@ -627,11 +633,70 @@ def cs():
 ###########turnirji:
 @get("/red_cards")
 def rc():
+    red_cards = """SELECT LEFT(t.tournament_name, 4) AS tournament, count(b.booking_id) AS nm_bookings FROM bookings b
+        JOIN tournaments t ON t.tournament_id = b.tournament_id
+        GROUP BY tournament_name, b.red_card
+        HAVING b.red_card = 'True'
+        ORDER BY tournament_name;"""
+    df1 = pd.read_sql_query(red_cards, conn)
+
+    fig1 = go.Figure()
+
+    fig1.add_trace(
+        go.Scatter(
+            x=df1["tournament"],
+            y=df1["nm_bookings"],
+            mode="lines",
+            name="Line",
+            line=dict(color="red"),
+        )
+    )
+
+    fig1.update_layout(
+        title="Number of red cards per tournament",
+        xaxis_title="Year",
+        yaxis_title="Number of red cards",
+    )
+
+    fig1.update_layout(
+        margin=dict(l=0,r=0,b=0,t=0),
+        paper_bgcolor = "#C5C6D0"
+    )
+
+    file_path1 = f"{folder_path}/red_cards.html"
+    fig1.write_html(file_path1, include_plotlyjs="cdn")
     return template(f"graphs/red_cards.html")
 
 
 @get("/goals_tour")
 def goals_t():
+    goals_tournaments = """
+    SELECT t.tournament_name, count(g.goal_id) AS numOfGoals FROM GOALS g
+    JOIN tournaments t ON t.tournament_id = g.tournament_id
+    GROUP BY t.tournament_name
+    ORDER BY t.tournament_name ASC;
+    """
+
+    df2 = pd.read_sql_query(goals_tournaments,conn)
+
+    fig2 = go.Figure()
+
+    fig2.add_trace(
+        go.Pie(
+            labels=df2["tournament_name"],
+            values=df2["numofgoals"],
+            title= "Number of goals per tournament",
+            hole= 0.82
+        )
+    )
+
+    fig2.update_layout(
+        margin=dict(l=0,r=0,b=0,t=0),
+        paper_bgcolor = "#C5C6D0"
+    )
+
+    file_path2 = f"{folder_path}/goals_tour.html"
+    fig2.write_html(file_path2, include_plotlyjs="cdn")
     return template(f"graphs/goals_tour.html")
 
 
@@ -648,6 +713,8 @@ def matches_tour():
 #######Države
 @get("/tour_c")
 def tour_c():
+    uporabnik_id = preveri_uporabnika()
+    ekipe = pridobi_ze_izbrane_drzave(cur, uporabnik_id)
     return template(f"graphs/tour_country.html")
 
 

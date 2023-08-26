@@ -44,7 +44,7 @@ FROM MATCHES m
 LEFT JOIN teams t ON m.away_team_id = t.team_id) tab
 GROUP BY team_name
 ORDER BY Wins DESC
-LIMIT 10;
+LIMIT 20;
 """
 
 df1 = pd.read_sql_query(top_ten_wins, connection)
@@ -65,6 +65,11 @@ fig1.add_trace(
     )
 )
 
+fig1.update_layout(
+    margin=dict(l=0,r=0,b=0,t=0),
+    paper_bgcolor = "#C5C6D0"
+)
+
 ###fig.show()
 
 file_path1 = f"{folder_path}/top_wins.html"
@@ -81,7 +86,7 @@ JOIN player_appearances pa ON pa.player_id = p.player_id
 JOIN teams t ON pa.team_id = t.team_id
 GROUP BY p.family_name, p.given_name, t.team_name
 ORDER BY goals desc
-LIMIT 10;
+LIMIT 20;
 """
 
 df2 = pd.read_sql_query(top_ten_goals, connection)
@@ -102,6 +107,11 @@ fig2.add_trace(
     )
 )
 
+fig2.update_layout(
+    margin=dict(l=0,r=0,b=0,t=0),
+    paper_bgcolor = "#C5C6D0"
+)
+
 file_path2 = f"{folder_path}/top_goals.html"
 fig2.write_html(file_path2, include_plotlyjs="cdn")
 
@@ -110,7 +120,7 @@ fig2.write_html(file_path2, include_plotlyjs="cdn")
 top_ten_appearances = """select team_name as team, team_code as code, COUNT(DISTINCT tournament_id) AS num_on_a_tournament from qualified_teams
 GROUP BY team_name, team_code
 ORDER BY num_on_a_tournament DESC
-LIMIT 10;"""
+LIMIT 20;"""
 
 df3 = pd.read_sql_query(top_ten_appearances, connection)
 
@@ -128,6 +138,10 @@ fig3.add_trace(
                     align = ['center', 'center', 'center'],
                     font = dict(color = 'darkslategray', size = 12)  )
     )
+)
+fig3.update_layout(
+    margin=dict(l=0,r=0,b=0,t=0),
+    paper_bgcolor = "#C5C6D0"
 )
 
 file_path3 = f"{folder_path}/top_app.html"
@@ -148,7 +162,7 @@ inner join match_goals mg on mg.match_id = pa.match_id and pa.team_id = mg.team_
 where p.goal_keeper = true
 GROUP BY player_name, team --, mg.match_id
 ORDER BY clean_sheet desc
-limit 10;
+limit 20;
 """
 
 df4 = pd.read_sql_query(top_ten_cs, connection)
@@ -167,6 +181,11 @@ fig4.add_trace(
                     align = ['center', 'center', 'center'],
                     font = dict(color = 'darkslategray', size = 12)  )
     )
+)
+
+fig4.update_layout(
+    margin=dict(l=0,r=0,b=0,t=0),
+    paper_bgcolor = "#C5C6D0"
 )
 
 file_path4 = f"{folder_path}/top_cs.html"
