@@ -155,7 +155,6 @@ def registracija_get():
 
 # TODO (Val): Posodobi ER diagram s tabelo uporabniki
 @post("/registracija", name="registracija_post")
-@post("/registracija", name="registracija_post")
 def registracija_post():
     """
     Handles the registration form submission by validating the input data and inserting a new user into the database.
@@ -176,7 +175,6 @@ def registracija_post():
     )
 
     if not registracija_ok_bool:
-        # nastavi_sporocilo(msg)
         response.set_cookie("sporocilo", msg)  # , secret=SECRET_COOKIE_KEY, path="/")
         # imamo napako, nastavimo piškotke in preusmerimo
         response.set_cookie("ime", ime, path="/", secret=SECRET_COOKIE_KEY)
@@ -434,10 +432,10 @@ def uporabnik_post_odstrani_vse_drzave():
     id_uporabnika = preveri_uporabnika()
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    ze_izbrane_drzave = pridobi_ze_izbrane_drzave(cur, id_uporabnika)
-
-    for drzava in ze_izbrane_drzave:
-        odstrani_drzavo(cur, id_uporabnika, drzava)
+    cur.execute(
+        f"DELETE FROM ekipe_uporabnika WHERE user_id = {id_uporabnika}"
+    )
+    conn.commit()
 
     redirect(url("uporabnik_get"))
 
@@ -581,6 +579,30 @@ def profil_get():
         vloga=vloga,
     )
 
+@post('/profil')
+def profil_post():
+    id_uporabnika = preveri_uporabnika()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    staro_geslo = request.forms.geslo_staro # type: ignore
+    novo_geslo1 = request.forms.geslo1 # type: ignore
+    novo_geslo2 = request.forms.geslo2 # type: ignore
+    cur.execute("SELECT geslo FROM uporabniki WHERE id = %s", [id_uporabnika])
+    hash_geslo = DBUtils().dobi_prvi_rezultat(cur)
+    if DBUtils.izracunaj_hash_gesla(staro_geslo) != hash_geslo:
+        response.set_cookie("sporocilo", 'Staro geslo je napačno!')
+        redirect(url('profil_get'))
+    elif len(novo_geslo1) < 4:
+        response.set_cookie("sporocilo", 'Novo geslo mora imeti vsaj 4 znake!')
+        redirect(url('profil_get'))
+    elif novo_geslo1 != novo_geslo2:
+        response.set_cookie("sporocilo", 'Gesli se ne ujemata!')
+        redirect(url('profil_get'))
+    else:
+        novo_geslo = DBUtils.izracunaj_hash_gesla(novo_geslo1)  
+        cur.execute("UPDATE uporabniki SET geslo = %s WHERE id = %s", [novo_geslo, id_uporabnika])
+        conn.commit()
+        response.set_cookie("sporocilo", 'Uspesno')
+        redirect(url('profil_get'))
 
 @get("/wins")
 def wins():

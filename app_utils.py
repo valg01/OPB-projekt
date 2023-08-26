@@ -124,7 +124,6 @@ class RegistracijaUtils:
         else:
             return (True, "")
 
-
 class GeneralUtils:
     @staticmethod
     def flatten_list(l):
