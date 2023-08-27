@@ -630,6 +630,11 @@ def cs():
     return template(f"graphs/top_cs.html")
 
 
+def join_countries(array):
+    joined_values = ', '.join(["'" + value + "'" for value in array])
+    return joined_values 
+
+
 ###########turnirji:
 @get("/red_cards")
 def rc():
@@ -715,27 +720,297 @@ def matches_tour():
 def tour_c():
     uporabnik_id = preveri_uporabnika()
     ekipe = pridobi_ze_izbrane_drzave(cur, uporabnik_id)
+    if len(ekipe) > 0:
+        drzave = join_countries(ekipe)
+        tournament_country = f"""SELECT --c.confederation_code as ConfederationCode
+        c.confederation_name as ConfederationName
+        , tour.host_country
+        , COUNT(DISTINCT tournament_id) as num
+        from tournaments tour
+        join teams t on t.team_name = tour.host_country
+        join confederations c on c.confederation_id = t.confederation_id
+        WHERE t.team_name in ({drzave})
+        group by ConfederationName, tour.host_country;
+        """
+    else:
+        tournament_country = """SELECT --c.confederation_code as ConfederationCode
+        c.confederation_name as ConfederationName
+        , tour.host_country
+        , COUNT(DISTINCT tournament_id) as num
+        from tournaments tour
+        join teams t on t.team_name = tour.host_country
+        join confederations c on c.confederation_id = t.confederation_id
+        group by ConfederationName, tour.host_country;
+        """
+    
+    df1 = pd.read_sql_query(tournament_country, conn)
+
+    fig1 = px.treemap(df1, path=["confederationname", "host_country"], values=df1["num"])
+
+    fig1.update_layout(
+        title="Number of tournaments per confederation and country",
+        margin=dict(t=40, l=0, r=0, b=0),
+    )
+
+    fig1.update_layout(
+        margin=dict(l=0,r=0,b=0,t=0),
+        paper_bgcolor = "#C5C6D0"
+    )
+
+    file_path1 = f"{folder_path}/tour_country.html"
+    fig1.write_html(file_path1, include_plotlyjs="cdn")
     return template(f"graphs/tour_country.html")
 
 
 @get("/awards_country")
 def award_country():
+    uporabnik_id = preveri_uporabnika()
+    ekipe = pridobi_ze_izbrane_drzave(cur, uporabnik_id)
+    if len(ekipe) > 0:
+        drzave = join_countries(ekipe)
+        awards_country = f"""SELECT  t.team_name,
+        -- c.confederation_code,
+        award_name, count(award_id) AS num_of_awards FROM award_winners a
+        JOIN players p ON a.player_id = p.player_id
+        join player_appearances pa on p.player_id = pa.player_id
+        join teams t on pa.team_id = t.team_id
+        join confederations c on c.confederation_id = t.confederation_id
+        where t.team_name in ({drzave})
+        GROUP BY t.team_name, c.confederation_code, a.award_name 
+        order by num_of_awards desc, award_name DESC;
+        """
+    else:
+        awards_country = """SELECT  t.team_name,
+        -- c.confederation_code,
+        award_name, count(award_id) AS num_of_awards FROM award_winners a
+        JOIN players p ON a.player_id = p.player_id
+        join player_appearances pa on p.player_id = pa.player_id
+        join teams t on pa.team_id = t.team_id
+        join confederations c on c.confederation_id = t.confederation_id
+        GROUP BY t.team_name, c.confederation_code, a.award_name 
+        order by num_of_awards desc, award_name DESC;
+        """
+    df2 = pd.read_sql_query(awards_country, conn)
+    fig2 = go.Figure()
+    for award_name in df2['award_name'].unique():
+        award_data = df2[df2['award_name'] == award_name]
+        team_names = award_data['team_name']
+        num_of_awards = award_data['num_of_awards']
+
+
+
+        fig2.add_trace(
+            go.Bar(
+                y = num_of_awards,
+                x = team_names,
+                name = award_name
+            )
+        )
+
+    fig2.update_layout(
+        title="Number of Awards by Team",
+        xaxis_title="Teams",
+        yaxis_title="Number of awards",
+        barmode='stack',
+    )
+    fig2.update_layout(
+        margin=dict(l=0,r=0,b=0,t=0),
+        paper_bgcolor = "#C5C6D0"
+    )
+
+    file_path2 = f"{folder_path}/awards_c.html"
+    fig2.write_html(file_path2, include_plotlyjs="cdn")
     return template(f"graphs/awards_c.html")
 
 
 @get("/age_tournament")
 def age_t():
+    uporabnik_id = preveri_uporabnika()
+    ekipe = pridobi_ze_izbrane_drzave(cur, uporabnik_id)
+    if len(ekipe) > 0:
+        drzave = join_countries(ekipe)
+        age_country_tournament = f"""select tournament_name, team_name, AVG(age) as average_age
+        from players_age
+        WHERE team_name in ({drzave})
+        GROUP BY tournament_name, team_name
+        ORDER BY tournament_name ASC, average_age ASC;
+        """
+    else:
+        age_country_tournament = """select tournament_name, team_name, AVG(age) as average_age
+        from players_age
+        GROUP BY tournament_name, team_name
+        ORDER BY tournament_name ASC, average_age ASC;
+        """
+    df3 = pd.read_sql_query(age_country_tournament, conn)
+
+    fig3 = go.Figure()
+
+    for team in df3["team_name"].unique():
+        team_data = df3[df3['team_name'] == team]
+        fig3.add_trace(
+            go.Line(
+                x = team_data["tournament_name"],
+                y = team_data["average_age"],
+                mode = "lines+markers",
+                name = team
+            )
+        )
+
+    fig3.update_layout(
+        title="Average Age by Tournament and Team",
+        xaxis_title="Tournament",
+        yaxis_title="Average Age",
+        xaxis=dict(type='category'),  # Use categorical x-axis
+        showlegend=True
+    )
+
+    fig3.update_layout(
+        margin=dict(l=0,r=0,b=0,t=0),
+        paper_bgcolor = "#C5C6D0"
+    )
+
+    file_path3 = f"{folder_path}/age_t.html"
+    fig3.write_html(file_path3, include_plotlyjs="cdn")     
     return template(f"graphs/age_t.html")
 
 
 @get("/goals_country")
 def goals_country():
+    uporabnik_id = preveri_uporabnika()
+    ekipe = pridobi_ze_izbrane_drzave(cur, uporabnik_id)
+    if len(ekipe) > 0:
+        drzave = join_countries(ekipe)
+        goals_countries = f"""SELECT  t.team_name AS team
+        , COUNT(DISTINCT g.goal_id) as NumberOfGoals FROM players p
+        JOIN goals g ON p.player_id = g.player_id
+        JOIN player_appearances pa ON pa.player_id = p.player_id
+        JOIN teams t ON pa.team_id = t.team_id
+        WHERE t.team_name in ({drzave})
+        GROUP BY  t.team_name
+        ORDER BY NumberOfGoals desc;
+        """
+    else:
+        goals_countries = """SELECT  t.team_name AS team
+        , COUNT(DISTINCT g.goal_id) as NumberOfGoals FROM players p
+        JOIN goals g ON p.player_id = g.player_id
+        JOIN player_appearances pa ON pa.player_id = p.player_id
+        JOIN teams t ON pa.team_id = t.team_id
+        GROUP BY  t.team_name
+        ORDER BY NumberOfGoals desc;
+        """
+    df4 = pd.read_sql_query(goals_countries, conn)
+
+    fig4 = go.Figure()
+
+    fig4.add_trace(
+        go.Pie(
+            labels = df4["team"],
+            values = df4["numberofgoals"],
+            textinfo= "none"
+        )
+    )
+
+    fig4.update_layout(
+        showlegend = False
+    )
+
+    fig4.update_layout(
+        margin=dict(l=0,r=0,b=0,t=0),
+        paper_bgcolor = "#C5C6D0"
+    )
+
+    file_path4 = f"{folder_path}/goals_c.html"
+    fig4.write_html(file_path4, include_plotlyjs="cdn")
     return template(f"graphs/goals_c.html")
 
 
 @get("/position")
 def position():
-    return template(f"graphs/position.html")
+    uporabnik_id = preveri_uporabnika()
+    ekipe = pridobi_ze_izbrane_drzave(cur, uporabnik_id)
+    if len(ekipe) > 0:
+        drzave = join_countries(ekipe)
+        countires_position = f"""SELECT t.team_name as team,
+        COUNT(CASE WHEN "position" = 1 then ts.team_id END) as winners,
+        COUNT(CASE WHEN "position" = 2 then ts.team_id END) as runnerups,
+        COUNT(CASE WHEN "position" = 3 then ts.team_id END) as third,
+        COUNT(CASE WHEN "position" = 4 then ts.team_id END) as fourth
+        FROM tournament_standings ts
+        join teams t on t.team_id = ts.team_id
+        where team_name in ({drzave})
+        GROUP BY t.team_name
+        order by winners desc, runnerups desc, third desc, fourth DESC, team asc;
+        """
+    else:
+        countires_position = f"""SELECT t.team_name as team,
+        COUNT(CASE WHEN "position" = 1 then ts.team_id END) as winners,
+        COUNT(CASE WHEN "position" = 2 then ts.team_id END) as runnerups,
+        COUNT(CASE WHEN "position" = 3 then ts.team_id END) as third,
+        COUNT(CASE WHEN "position" = 4 then ts.team_id END) as fourth
+        FROM tournament_standings ts
+        join teams t on t.team_id = ts.team_id
+        GROUP BY t.team_name
+        order by winners desc, runnerups desc, third desc, fourth DESC, team asc;
+        """
+    df5 = pd.read_sql_query(countires_position, conn)
+
+    fig5 = go.Figure()
+
+    fig5.add_trace(
+        go.Bar(
+            x = df5["team"],
+            y = df5["winners"],
+            name = "Winners",
+            marker_color = '#FFD700'
+        )
+    )
+
+    fig5.add_trace(
+        go.Bar(
+            x = df5["team"],
+            y = df5["runnerups"],
+            name="Runner ups",
+            base = df5["winners"],
+            marker_color = "#C0C0C0"
+        )
+    )
+
+    fig5.add_trace(
+        go.Bar(
+            x = df5["team"],
+            y = df5["third"],
+            name = "Third",
+            base = df5["winners"] + df5["runnerups"],
+            marker_color = "#CD7F32"
+        )
+    )
+
+    fig5.add_trace(
+        go.Bar(
+            x = df5["team"],
+            y = df5["fourth"],
+            name = "Fourth",
+            base = df5["winners"] + df5["runnerups"] + df5["third"],
+            marker_color = "#A52A2A"
+        )
+    )
+
+    fig5.update_layout(
+        title="Tournament Performance by Team",
+        xaxis_title="Team",
+        yaxis_title="Number of Occurrences",
+        barmode='stack',
+        showlegend=True
+    )
+
+    fig5.update_layout(
+        margin=dict(l=0,r=0,b=0,t=0),
+        paper_bgcolor = "#C5C6D0"
+    )
+
+    file_path5 = f"{folder_path}/position.html"
+    fig5.write_html(file_path5, include_plotlyjs="cdn")
+    return template(f"graphs/position.html")    
 
 
 #####Igralci
@@ -743,21 +1018,225 @@ def position():
 
 @get("/goals_p")
 def goals_p():
+    uporabnik_id = preveri_uporabnika()
+    ekipe = pridobi_ze_izbrane_drzave(cur, uporabnik_id)
+    if len(ekipe) > 0:
+        drzave = join_countries(ekipe)
+        goals_players = f"""SELECT CASE
+        WHEN p.given_name = 'not applicable' THEN p.family_name
+        ELSE CONCAT(p.family_name || ' ', p.given_name) END
+        AS player_name, t.team_name AS team, count(DISTINCT g.goal_id) AS goals FROM players p
+        JOIN goals g ON p.player_id = g.player_id
+        JOIN player_appearances pa ON pa.player_id = p.player_id
+        JOIN teams t ON pa.team_id = t.team_id
+        WHERE t.team_name in ({drzave})
+        GROUP BY player_name, t.team_name
+        ORDER BY goals desc
+        """
+    else:
+        goals_players = """SELECT CASE
+        WHEN p.given_name = 'not applicable' THEN p.family_name
+        ELSE CONCAT(p.family_name || ' ', p.given_name) END
+        AS player_name, t.team_name AS team, count(DISTINCT g.goal_id) AS goals FROM players p
+        JOIN goals g ON p.player_id = g.player_id
+        JOIN player_appearances pa ON pa.player_id = p.player_id
+        JOIN teams t ON pa.team_id = t.team_id
+        GROUP BY player_name, t.team_name
+        ORDER BY goals desc
+        """
+    df1 = pd.read_sql_query(goals_players, conn)
+
+    fig1 = go.Figure()
+
+    fig1.add_trace(
+        go.Bar(
+            x = df1["player_name"],
+            y = df1["goals"]
+        )
+    )
+
+    fig1.update_layout(
+        margin=dict(l=0,r=0,b=0,t=0),
+        paper_bgcolor = "#C5C6D0"
+    )
+
+    file_path1 = f"{folder_path}/goals_p.html"
+    fig1.write_html(file_path1, include_plotlyjs="cdn")
     return template(f"graphs/goals_p.html")
 
 
 @get("/bookings_p")
 def bookings_p():
+    bookings_players = """SELECT CASE
+    WHEN p.given_name = 'not applicable' THEN p.family_name
+    ELSE CONCAT(p.family_name || ' ', p.given_name) END as player_name,
+    COUNT(CASE when yellow_card = True THEN booking_id END) as num_yellow,
+    COUNT(CASE when red_card = True THEN booking_id END) as num_red,
+    COUNT(CASE when second_yellow_card = True THEN booking_id END) as num_second_yellow,
+    COUNT(CASE when b.sending_off = True THEN booking_id END) as num_sending_off from bookings b
+    JOIN players p on b.player_id = p.player_id
+    group by player_name
+    ORDER BY num_yellow desc, num_red desc, num_second_yellow desc, num_sending_off desc
+    LIMIT 200;
+    """
+
+    df2 = pd.read_sql_query(bookings_players, conn)
+
+    fig2 = go.Figure()
+
+    fig2.add_trace(
+        go.Bar(
+            x = df2['player_name'],
+            y = df2['num_yellow'],
+            name='Number of yellow cards',
+            width = 0.7
+        )
+    )
+
+    fig2.add_trace(
+        go.Bar(
+            x = df2['player_name'],
+            y = df2['num_red'],
+            name='Number of red cards',
+            base = df2['num_yellow'],
+            width = 0.7
+        )
+    )
+
+    fig2.add_trace(
+        go.Bar(
+            x = df2['player_name'],
+            y = df2['num_second_yellow'],
+            name='Number of second yellow cards',
+            base = df2['num_yellow'] + df2['num_red'],
+            width = 0.7
+        )
+    )
+
+    fig2.add_trace(
+        go.Line(
+            x = df2['player_name'],
+            y = df2['num_sending_off'],
+            name = "Number of sending-offs",
+            line=dict(color="cyan"),
+            fill = "tonexty"
+        )
+    )
+
+    fig2.update_layout(
+        title = 'Top 100 Players per Booking',
+        xaxis_title="Player",
+        yaxis_title="Number of Bookings",
+        barmode='stack', 
+        showlegend=True
+    )
+
+    fig2.update_layout(
+        margin=dict(l=0,r=0,b=0,t=0),
+        paper_bgcolor = "#C5C6D0"
+    )
+
+    file_path2 = f"{folder_path}/bookings_p.html"
+    fig2.write_html(file_path2, include_plotlyjs="cdn")
     return template(f"graphs/bookings_p.html")
 
 
 @get("/awards_p")
 def awards_p():
+    uporabnik_id = preveri_uporabnika()
+    ekipe = pridobi_ze_izbrane_drzave(cur, uporabnik_id)
+    if len(ekipe) > 0:
+        drzave = join_countries(ekipe)
+        players_awards = f"""
+        SELECT  c.confederation_code, t.team_name,
+        case  WHEN p.given_name = 'not applicable' THEN p.family_name
+        ELSE CONCAT(p.family_name || ' ', p.given_name) END as player_name,  count(Distinct award_id) AS num_of_awards FROM award_winners a
+        JOIN players p ON a.player_id = p.player_id
+        join player_appearances pa on p.player_id = pa.player_id
+        join teams t on pa.team_id = t.team_id
+        join confederations c on c.confederation_id = t.confederation_id
+        where t.team_name in ({drzave})
+        GROUP BY t.team_name, player_name, c.confederation_code
+        order by num_of_awards DESC;
+        """
+    else:
+        players_awards = """
+        SELECT  c.confederation_code, t.team_name,
+        case  WHEN p.given_name = 'not applicable' THEN p.family_name
+        ELSE CONCAT(p.family_name || ' ', p.given_name) END as player_name,  count(Distinct award_id) AS num_of_awards FROM award_winners a
+        JOIN players p ON a.player_id = p.player_id
+        join player_appearances pa on p.player_id = pa.player_id
+        join teams t on pa.team_id = t.team_id
+        join confederations c on c.confederation_id = t.confederation_id
+        GROUP BY t.team_name, player_name, c.confederation_code
+        order by num_of_awards DESC;
+        """
+    df3 = pd.read_sql_query(players_awards, conn)
+
+    fig3 = px.treemap(df3, path=["confederation_code","team_name", "player_name"], values=df3["num_of_awards"])
+
+    fig3.update_layout(
+        margin=dict(l=0,r=0,b=0,t=0),
+        paper_bgcolor = "#C5C6D0"
+    )
+
+    file_path3 = f"{folder_path}/awards_p.html"
+    fig3.write_html(file_path3, include_plotlyjs="cdn")
     return template(f"graphs/awards_p.html")
 
 
 @get("/scatter_p")
 def scatter_p():
+    uporabnik_id = preveri_uporabnika()
+    ekipe = pridobi_ze_izbrane_drzave(cur, uporabnik_id)
+    if len(ekipe) > 0:
+        drzave = join_countries(ekipe)
+        age_goals = f"""SELECT case
+        WHEN p.given_name = 'not applicable' then p.family_name
+        ELSE CONCAT(p.family_name || ' ', p.given_name) END
+        AS player_name,
+        COUNT(DISTINCT pa.match_id) AS appearances,
+        count(DISTINCT g.goal_id) AS goals,
+        AVG(CAST(RIGHT(pa.tournament_id, 4) AS INT)  - EXTRACT('YEAR' FROM p.birth_date)) as average_age,
+        CASE
+        WHEN AVG(CAST(RIGHT(pa.tournament_id, 4) AS INT)  - EXTRACT('YEAR' FROM p.birth_date)) <= 24 then '<= 24 years' 
+        when AVG(CAST(RIGHT(pa.tournament_id, 4) AS INT)  - EXTRACT('YEAR' FROM p.birth_date)) <= 31 then '< 24 <= 31 years'
+        ELSE '> 31 years' END as age_group
+        FROM player_appearances pa
+        JOIN players p on p.player_id = pa.player_id
+        left JOIN goals g ON pa.player_id = g.player_id and pa.match_id = g.match_id
+        GROUP BY  player_name
+        ORDER BY age_group ASC, GOALS desc;
+        """
+    else:
+        age_goals = """SELECT case
+        WHEN p.given_name = 'not applicable' then p.family_name
+        ELSE CONCAT(p.family_name || ' ', p.given_name) END
+        AS player_name,
+        COUNT(DISTINCT pa.match_id) AS appearances,
+        count(DISTINCT g.goal_id) AS goals,
+        AVG(CAST(RIGHT(pa.tournament_id, 4) AS INT)  - EXTRACT('YEAR' FROM p.birth_date)) as average_age,
+        CASE
+        WHEN AVG(CAST(RIGHT(pa.tournament_id, 4) AS INT)  - EXTRACT('YEAR' FROM p.birth_date)) <= 24 then '<= 24 years' 
+        when AVG(CAST(RIGHT(pa.tournament_id, 4) AS INT)  - EXTRACT('YEAR' FROM p.birth_date)) <= 31 then '< 24 <= 31 years'
+        ELSE '> 31 years' END as age_group
+        FROM player_appearances pa
+        JOIN players p on p.player_id = pa.player_id
+        left JOIN goals g ON pa.player_id = g.player_id and pa.match_id = g.match_id
+        GROUP BY  player_name
+        ORDER BY age_group ASC, GOALS desc;
+        """ 
+    df4 = pd.read_sql_query(age_goals, conn)
+
+    fig4 = px.scatter(df4, x = "average_age", y = "appearances",  trendline="ols",color = "goals", size="goals", hover_data="player_name")
+
+    fig4.update_layout(
+        margin=dict(l=0,r=0,b=0,t=0),
+        paper_bgcolor = "#C5C6D0"
+    )
+
+    file_path4 = f"{folder_path}/scatter_p.html"
+    fig4.write_html(file_path4, include_plotlyjs="cdn") 
     return template(f"graphs/scatter_p.html")
 
 
