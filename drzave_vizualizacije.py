@@ -118,10 +118,6 @@ file_path3 = f"{folder_path}/age_t.html"
 fig3.write_html(file_path3, include_plotlyjs="cdn")
 
 goals_countries = """SELECT  t.team_name AS team
-/*, COALESCE(sum(CASE WHEN p.goal_keeper THEN 1 ELSE 0 END)) as goals_keeper
-, COALESCE(sum(CASE WHEN p.defender THEN 1 ELSE 0 END)) as goals_defender
-, COALESCE(sum(CASE WHEN p.midfielder THEN 1 ELSE 0 END)) as goals_midfielder
-, COALESCE(sum(CASE WHEN p.forward THEN 1 ELSE 0 END)) as goals_forward */
 , COUNT(DISTINCT g.goal_id) as NumberOfGoals FROM players p
 JOIN goals g ON p.player_id = g.player_id
 JOIN player_appearances pa ON pa.player_id = p.player_id
