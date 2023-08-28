@@ -75,11 +75,13 @@ fig2.update_layout(
 file_path2 = f"{folder_path}/goals_tour.html"
 fig2.write_html(file_path2, include_plotlyjs="cdn")
 
-goals_stadium_country = """SELECT s.city_name as city, s.country_name as country, COUNT(DISTINCT g.goal_id) as numOfGoals
+goals_stadium_country = """SELECT s.stadium_name as stadium, s.city_name as city, s.country_name as country, COUNT(DISTINCT g.goal_id) as numOfGoals
 from stadiums s
 join matches m on m.stadium_id = s.stadium_id
 JOIN goals g on g.match_id = m.match_id
-GROUP BY s.city_name, s.country_name
+left join player_appearances pa on pa.player_id = g.player_id
+left join teams t on t.team_id = pa.team_id
+GROUP BY s.stadium_name, s.city_name, s.country_name
 ORDER BY numOfGoals DESC ;
 """
 

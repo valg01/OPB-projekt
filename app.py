@@ -638,11 +638,27 @@ def join_countries(array):
 ###########turnirji:
 @get("/red_cards")
 def rc():
-    red_cards = """SELECT LEFT(t.tournament_name, 4) AS tournament, count(b.booking_id) AS nm_bookings FROM bookings b
+    uporabnik_id = preveri_uporabnika()
+    ekipe = pridobi_ze_izbrane_drzave(cur, uporabnik_id)
+    if len(ekipe) > 0:
+        drzave = join_countries(ekipe)
+        red_cards = f"""select left(t.tournament_name, 4) AS tournament, count(b.booking_id) AS nm_bookings FROM bookings b
         JOIN tournaments t ON t.tournament_id = b.tournament_id
+        left join player_appearances pa on pa.player_id = b.player_id
+        left join teams te on pa.team_id = te.team_id
+        where te.team_name in ({drzave})
         GROUP BY tournament_name, b.red_card
         HAVING b.red_card = 'True'
         ORDER BY tournament_name;"""
+    else:
+        red_cards = """select left(t.tournament_name, 4) AS tournament, count(b.booking_id) AS nm_bookings FROM bookings b
+        JOIN tournaments t ON t.tournament_id = b.tournament_id
+        left join player_appearances pa on pa.player_id = b.player_id
+        left join teams te on pa.team_id = te.team_id
+        GROUP BY tournament_name, b.red_card
+        HAVING b.red_card = 'True'
+        ORDER BY tournament_name;"""
+    
     df1 = pd.read_sql_query(red_cards, conn)
 
     fig1 = go.Figure()
@@ -707,11 +723,82 @@ def goals_t():
 
 @get("/goals_scored_in")
 def goals_in():
+    uporabnik_id = preveri_uporabnika()
+    ekipe = pridobi_ze_izbrane_drzave(cur, uporabnik_id)
+    if len(ekipe) > 0:
+        drzave = join_countries(ekipe)
+        goals_stadium_country = f"""SELECT s.stadium_name as stadium, s.city_name as city, s.country_name as country, COUNT(DISTINCT g.goal_id) as numOfGoals
+        from stadiums s
+        join matches m on m.stadium_id = s.stadium_id
+        JOIN goals g on g.match_id = m.match_id
+        left join player_appearances pa on pa.player_id = g.player_id
+        left join teams t on t.team_id = pa.team_id
+        where t.team_name in ({drzave})
+        GROUP BY s.stadium_name, s.city_name, s.country_name
+        ORDER BY numOfGoals DESC ;
+        """
+    else:
+        goals_stadium_country = """SELECT s.stadium_name as stadium, s.city_name as city, s.country_name as country, COUNT(DISTINCT g.goal_id) as numOfGoals
+        from stadiums s
+        join matches m on m.stadium_id = s.stadium_id
+        JOIN goals g on g.match_id = m.match_id
+        left join player_appearances pa on pa.player_id = g.player_id
+        left join teams t on t.team_id = pa.team_id
+        GROUP BY s.stadium_name, s.city_name, s.country_name
+        ORDER BY numOfGoals DESC ;
+        """
+    df3 = pd.read_sql_query(goals_stadium_country, conn)
+
+    fig3 = px.treemap(
+            df3,
+            path=["country", "city"],
+            values=df3["numofgoals"]
+        )
+
+    fig3.update_layout(
+        title="Goals scored in city and country",
+        margin=dict(t=40, l=0, r=0, b=0),
+    )
+
+    fig3.update_layout(
+        margin=dict(l=0,r=0,b=0,t=0),
+        paper_bgcolor = "#C5C6D0"
+    )
+
+    file_path3 = f"{folder_path}/goals_country.html"
+    fig3.write_html(file_path3, include_plotlyjs="cdn")
     return template(f"graphs/goals_country.html")
 
 
 @get("/matches_tour")
 def matches_tour():
+    matches_tournament = """
+    SELECT t.tournament_name, count(m.match_id) as numOfMatches from matches m
+    join tournaments t on t.tournament_id = m.tournament_id
+    GROUP BY t.tournament_name
+    ORDER BY t.tournament_name;
+    """
+
+    df4 = pd.read_sql_query(matches_tournament, conn)
+
+    fig4 = go.Figure()
+
+    fig4.add_trace(
+        go.Bar(
+            y=df4["tournament_name"],
+            x=df4["numofmatches"],
+            orientation="h"
+        )
+    )
+    fig4.update_layout(
+        title = "Matches by tournament"
+    )
+    fig4.update_layout(
+        margin=dict(l=0,r=0,b=0,t=0),
+        paper_bgcolor = "#C5C6D0"
+    )
+    file_path4 = f"{folder_path}/matches_tour.html"
+    fig4.write_html(file_path4, include_plotlyjs="cdn")
     return template(f"graphs/matches_tour.html")
 
 
@@ -942,7 +1029,7 @@ def position():
         order by winners desc, runnerups desc, third desc, fourth DESC, team asc;
         """
     else:
-        countires_position = f"""SELECT t.team_name as team,
+        countires_position = """SELECT t.team_name as team,
         COUNT(CASE WHEN "position" = 1 then ts.team_id END) as winners,
         COUNT(CASE WHEN "position" = 2 then ts.team_id END) as runnerups,
         COUNT(CASE WHEN "position" = 3 then ts.team_id END) as third,
@@ -1067,18 +1154,38 @@ def goals_p():
 
 @get("/bookings_p")
 def bookings_p():
-    bookings_players = """SELECT CASE
-    WHEN p.given_name = 'not applicable' THEN p.family_name
-    ELSE CONCAT(p.family_name || ' ', p.given_name) END as player_name,
-    COUNT(CASE when yellow_card = True THEN booking_id END) as num_yellow,
-    COUNT(CASE when red_card = True THEN booking_id END) as num_red,
-    COUNT(CASE when second_yellow_card = True THEN booking_id END) as num_second_yellow,
-    COUNT(CASE when b.sending_off = True THEN booking_id END) as num_sending_off from bookings b
-    JOIN players p on b.player_id = p.player_id
-    group by player_name
-    ORDER BY num_yellow desc, num_red desc, num_second_yellow desc, num_sending_off desc
-    LIMIT 200;
-    """
+    uporabnik_id = preveri_uporabnika()
+    ekipe = pridobi_ze_izbrane_drzave(cur, uporabnik_id)
+    if len(ekipe) > 0:
+        drzave = join_countries(ekipe)
+        bookings_players = f"""SELECT CASE
+        WHEN p.given_name = 'not applicable' THEN p.family_name
+        ELSE CONCAT(p.family_name || ' ', p.given_name) END as player_name,
+        COUNT(CASE when yellow_card = True THEN booking_id END) as num_yellow,
+        COUNT(CASE when red_card = True THEN booking_id END) as num_red,
+        COUNT(CASE when second_yellow_card = True THEN booking_id END) as num_second_yellow,
+        COUNT(CASE when b.sending_off = True THEN booking_id END) as num_sending_off from bookings b
+        JOIN players p on b.player_id = p.player_id
+        left join player_appearances pa on pa.player_id = b.player_id and pa.match_id = b.match_id
+        left join teams te on pa.team_id = te.team_id
+        WHERE te.team_name in ({drzave})
+        group by player_name
+        ORDER BY num_yellow desc, num_red desc, num_second_yellow desc, num_sending_off desc;
+        """
+    else:
+        bookings_players = """SELECT CASE
+        WHEN p.given_name = 'not applicable' THEN p.family_name
+        ELSE CONCAT(p.family_name || ' ', p.given_name) END as player_name,
+        COUNT(CASE when yellow_card = True THEN booking_id END) as num_yellow,
+        COUNT(CASE when red_card = True THEN booking_id END) as num_red,
+        COUNT(CASE when second_yellow_card = True THEN booking_id END) as num_second_yellow,
+        COUNT(CASE when b.sending_off = True THEN booking_id END) as num_sending_off from bookings b
+        JOIN players p on b.player_id = p.player_id
+        left join player_appearances pa on pa.player_id = b.player_id and pa.match_id = b.match_id
+        left join teams te on pa.team_id = te.team_id
+        group by player_name
+        ORDER BY num_yellow desc, num_red desc, num_second_yellow desc, num_sending_off desc;
+        """
 
     df2 = pd.read_sql_query(bookings_players, conn)
 
@@ -1205,6 +1312,8 @@ def scatter_p():
         FROM player_appearances pa
         JOIN players p on p.player_id = pa.player_id
         left JOIN goals g ON pa.player_id = g.player_id and pa.match_id = g.match_id
+        left join teams t on t.team_id = pa.team_id
+        WHERE t.team_name in ({drzave})
         GROUP BY  player_name
         ORDER BY age_group ASC, GOALS desc;
         """
@@ -1223,6 +1332,7 @@ def scatter_p():
         FROM player_appearances pa
         JOIN players p on p.player_id = pa.player_id
         left JOIN goals g ON pa.player_id = g.player_id and pa.match_id = g.match_id
+        left join teams t on t.team_id = pa.team_id
         GROUP BY  player_name
         ORDER BY age_group ASC, GOALS desc;
         """ 
