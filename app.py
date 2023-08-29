@@ -35,7 +35,7 @@ psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
 conn = auth.connect()
 cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-folder_path = "/Users/valgroleger/Svetovna-prvenstva-v-nogometu/views/graphs"
+folder_path = "views/graphs"
 
 SERVER_PORT = os.environ.get("BOTTLE_PORT", 8080)
 RELOADER = os.environ.get("BOTTLE_RELOADER", True)
@@ -858,11 +858,10 @@ def award_country():
         awards_country = f"""SELECT  t.team_name,
         -- c.confederation_code,
         award_name, count(award_id) AS num_of_awards FROM award_winners a
-        JOIN players p ON a.player_id = p.player_id
-        join player_appearances pa on p.player_id = pa.player_id
-        join teams t on pa.team_id = t.team_id
-        join confederations c on c.confederation_id = t.confederation_id
-        where t.team_name in ({drzave})
+        left join player_team pt on pt.player_id = a.player_id
+        LEFT join teams t on pt.team_id = t.team_id
+        LEFT join confederations c on c.confederation_id = t.confederation_id
+        WHERE t.team_name in ({drzave})
         GROUP BY t.team_name, c.confederation_code, a.award_name 
         order by num_of_awards desc, award_name DESC;
         """
@@ -870,9 +869,8 @@ def award_country():
         awards_country = """SELECT  t.team_name,
         -- c.confederation_code,
         award_name, count(award_id) AS num_of_awards FROM award_winners a
-        JOIN players p ON a.player_id = p.player_id
-        join player_appearances pa on p.player_id = pa.player_id
-        join teams t on pa.team_id = t.team_id
+        left join player_team pt on pt.player_id = a.player_id
+        LEFT join teams t on pt.team_id = t.team_id
         join confederations c on c.confederation_id = t.confederation_id
         GROUP BY t.team_name, c.confederation_code, a.award_name 
         order by num_of_awards desc, award_name DESC;
