@@ -6,6 +6,7 @@ from functools import wraps
 
 import plotly.graph_objects as go
 import plotly.express as px
+import plotly.io as pio
 
 import psycopg2
 import psycopg2.extensions
@@ -43,6 +44,8 @@ RELOADER = os.environ.get("BOTTLE_RELOADER", True)
 SECRET_COOKIE_KEY = "37d445503ac1ed40e7b45775c0c3cd40"
 
 static_dir = "./static"
+
+pio.renderers.default = "notebook_connected"
 
 repo = Repo()
 auth = AuthService(repo)
@@ -554,7 +557,7 @@ def igralci():
         A rendered HTML template of the statistics page for teams.
     """
     znacka = preveri_znacko()
-    return template("igralci.html", naslov="igralci", znacka=znacka)
+    return template("igralci.html", naslov="Igralci", znacka=znacka)
 
 
 @get("/profil")
@@ -674,13 +677,13 @@ def rc():
     )
 
     fig1.update_layout(
-        title="Number of red cards per tournament",
+        title="Number of Red Cards per Tournament",
         xaxis_title="Year",
         yaxis_title="Number of red cards",
     )
 
     fig1.update_layout(
-        margin=dict(l=0,r=0,b=0,t=0),
+        margin=dict(l=0,r=0,b=0,t=30),
         paper_bgcolor = "#C5C6D0"
     )
 
@@ -706,13 +709,13 @@ def goals_t():
         go.Pie(
             labels=df2["tournament_name"],
             values=df2["numofgoals"],
-            title= "Number of goals per tournament",
-            hole= 0.82
+            title= "Number of Goals per Tournament",
+            hole= 0.75
         )
     )
 
     fig2.update_layout(
-        margin=dict(l=0,r=0,b=0,t=0),
+        margin=dict(l=0,r=0,b=0,t=30),
         paper_bgcolor = "#C5C6D0"
     )
 
@@ -756,12 +759,11 @@ def goals_in():
         )
 
     fig3.update_layout(
-        title="Goals scored in city and country",
-        margin=dict(t=40, l=0, r=0, b=0),
+        title="Goals scored in city and country"
     )
 
     fig3.update_layout(
-        margin=dict(l=0,r=0,b=0,t=0),
+        margin=dict(l=0,r=0,b=0,t=30),
         paper_bgcolor = "#C5C6D0"
     )
 
@@ -794,7 +796,7 @@ def matches_tour():
         title = "Matches by tournament"
     )
     fig4.update_layout(
-        margin=dict(l=0,r=0,b=0,t=0),
+        margin=dict(l=0,r=0,b=0,t=30),
         paper_bgcolor = "#C5C6D0"
     )
     file_path4 = f"{folder_path}/matches_tour.html"
@@ -835,12 +837,11 @@ def tour_c():
     fig1 = px.treemap(df1, path=["confederationname", "host_country"], values=df1["num"])
 
     fig1.update_layout(
-        title="Number of tournaments per confederation and country",
-        margin=dict(t=40, l=0, r=0, b=0),
+        title="Number of Tournaments per Confederation and Country",
     )
 
     fig1.update_layout(
-        margin=dict(l=0,r=0,b=0,t=0),
+        margin=dict(l=0,r=0,b=0,t=30),
         paper_bgcolor = "#C5C6D0"
     )
 
@@ -897,9 +898,11 @@ def award_country():
         xaxis_title="Teams",
         yaxis_title="Number of awards",
         barmode='stack',
+        xaxis=dict(tickangle=45)
+
     )
     fig2.update_layout(
-        margin=dict(l=0,r=0,b=0,t=0),
+        margin=dict(l=0,r=0,b=0,t=30),
         paper_bgcolor = "#C5C6D0"
     )
 
@@ -950,7 +953,7 @@ def age_t():
     )
 
     fig3.update_layout(
-        margin=dict(l=0,r=0,b=0,t=0),
+        margin=dict(l=0,r=0,b=0,t=30),
         paper_bgcolor = "#C5C6D0"
     )
 
@@ -996,11 +999,12 @@ def goals_country():
     )
 
     fig4.update_layout(
-        showlegend = False
+        showlegend = True,
+        title = "Goals Scored per Country"
     )
 
     fig4.update_layout(
-        margin=dict(l=0,r=0,b=0,t=0),
+        margin=dict(l=0,r=0,b=0,t=30),
         paper_bgcolor = "#C5C6D0"
     )
 
@@ -1085,11 +1089,13 @@ def position():
         xaxis_title="Team",
         yaxis_title="Number of Occurrences",
         barmode='stack',
-        showlegend=True
+        showlegend=True,
+        xaxis=dict(tickangle=45)
+
     )
 
     fig5.update_layout(
-        margin=dict(l=0,r=0,b=0,t=0),
+        margin=dict(l=0,r=0,b=0,t=30),
         paper_bgcolor = "#C5C6D0"
     )
 
@@ -1117,6 +1123,7 @@ def goals_p():
         WHERE t.team_name in ({drzave})
         GROUP BY player_name, t.team_name
         ORDER BY goals desc
+        LIMIT 150
         """
     else:
         goals_players = """SELECT CASE
@@ -1128,6 +1135,7 @@ def goals_p():
         JOIN teams t ON pa.team_id = t.team_id
         GROUP BY player_name, t.team_name
         ORDER BY goals desc
+        LIMIT 150
         """
     df1 = pd.read_sql_query(goals_players, conn)
 
@@ -1136,13 +1144,17 @@ def goals_p():
     fig1.add_trace(
         go.Bar(
             x = df1["player_name"],
-            y = df1["goals"]
+            y = df1["goals"],
+            width = 1.2,
+            marker=dict(color=df1["goals"], colorscale='Viridis')
         )
     )
 
     fig1.update_layout(
-        margin=dict(l=0,r=0,b=0,t=0),
-        paper_bgcolor = "#C5C6D0"
+        margin=dict(l=0,r=0,b=0,t=30),
+        paper_bgcolor = "#C5C6D0",
+        title = "Top 150 Players per Goals",
+        xaxis=dict(tickangle=45)
     )
 
     file_path1 = f"{folder_path}/goals_p.html"
@@ -1168,7 +1180,8 @@ def bookings_p():
         left join teams te on pa.team_id = te.team_id
         WHERE te.team_name in ({drzave})
         group by player_name
-        ORDER BY num_yellow desc, num_red desc, num_second_yellow desc, num_sending_off desc;
+        ORDER BY num_yellow desc, num_red desc, num_second_yellow desc, num_sending_off desc
+        LIMIT 100;
         """
     else:
         bookings_players = """SELECT CASE
@@ -1182,7 +1195,8 @@ def bookings_p():
         left join player_appearances pa on pa.player_id = b.player_id and pa.match_id = b.match_id
         left join teams te on pa.team_id = te.team_id
         group by player_name
-        ORDER BY num_yellow desc, num_red desc, num_second_yellow desc, num_sending_off desc;
+        ORDER BY num_yellow desc, num_red desc, num_second_yellow desc, num_sending_off desc
+        LIMIT 100;
         """
 
     df2 = pd.read_sql_query(bookings_players, conn)
@@ -1193,7 +1207,7 @@ def bookings_p():
         go.Bar(
             x = df2['player_name'],
             y = df2['num_yellow'],
-            name='Number of yellow cards',
+            name='Yellow cards',
             width = 0.7
         )
     )
@@ -1202,7 +1216,7 @@ def bookings_p():
         go.Bar(
             x = df2['player_name'],
             y = df2['num_red'],
-            name='Number of red cards',
+            name='Red cards',
             base = df2['num_yellow'],
             width = 0.7
         )
@@ -1212,7 +1226,7 @@ def bookings_p():
         go.Bar(
             x = df2['player_name'],
             y = df2['num_second_yellow'],
-            name='Number of second yellow cards',
+            name='Second yellow cards',
             base = df2['num_yellow'] + df2['num_red'],
             width = 0.7
         )
@@ -1222,7 +1236,7 @@ def bookings_p():
         go.Line(
             x = df2['player_name'],
             y = df2['num_sending_off'],
-            name = "Number of sending-offs",
+            name = "Sending-offs",
             line=dict(color="cyan"),
             fill = "tonexty"
         )
@@ -1233,11 +1247,12 @@ def bookings_p():
         xaxis_title="Player",
         yaxis_title="Number of Bookings",
         barmode='stack', 
-        showlegend=True
+        showlegend=True,
+        xaxis=dict(tickangle=45)
     )
 
     fig2.update_layout(
-        margin=dict(l=0,r=0,b=0,t=0),
+        margin=dict(l=0,r=0,b=0,t=30),
         paper_bgcolor = "#C5C6D0"
     )
 
@@ -1281,8 +1296,9 @@ def awards_p():
     fig3 = px.treemap(df3, path=["confederation_code","team_name", "player_name"], values=df3["num_of_awards"])
 
     fig3.update_layout(
-        margin=dict(l=0,r=0,b=0,t=0),
-        paper_bgcolor = "#C5C6D0"
+        margin=dict(l=0,r=0,b=0,t=30),
+        paper_bgcolor = "#C5C6D0",
+        title = "Awards by Confederation, Teams and Players"
     )
 
     file_path3 = f"{folder_path}/awards_p.html"
@@ -1339,8 +1355,9 @@ def scatter_p():
     fig4 = px.scatter(df4, x = "average_age", y = "appearances",  trendline="ols",color = "goals", size="goals", hover_data="player_name")
 
     fig4.update_layout(
-        margin=dict(l=0,r=0,b=0,t=0),
-        paper_bgcolor = "#C5C6D0"
+        margin=dict(l=0,r=0,b=0,t=30),
+        paper_bgcolor = "#C5C6D0",
+        title = "Goals Scored by Average Age and Appearances"
     )
 
     file_path4 = f"{folder_path}/scatter_p.html"

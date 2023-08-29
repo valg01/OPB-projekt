@@ -8,7 +8,7 @@
         .grid-container {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
-          grid-template-rows: repeat(3, 1fr);
+          grid-template-rows: repeat(2, 1fr);
           gap: 10px;
           height: 1000px;
         }
@@ -22,14 +22,14 @@
     </style>
 
 <div class="grid-container">
-<iframe id="igraph1" scrolling="no" seamless="seamless" src="{{url('/tour_c')}}" height="50%" width="50%"></iframe>
+<iframe id="igraph1" scrolling="no" seamless="seamless" src="{{url('/tour_c')}}" height="500px" width="50%"></iframe>
+<iframe id="igraph4" scrolling="no" seamless="seamless" src="{{url('/goals_country')}}" height="500px" width="100%"></iframe>
+<iframe id="igraph2" scrolling="no" seamless="seamless" src="{{url('/awards_country')}}" height="500px" width="50%"></iframe>
+<iframe id="igraph4" scrolling="no" seamless="seamless" src="{{url('/position')}}" height="500px" width="50%"></iframe>
+</div>
 
-<iframe id="igraph2" scrolling="no" seamless="seamless" src="{{url('/awards_country')}}" height="50%" width="50%"></iframe>
+<div class="grid-container" style="display: grid; grid-template-columns: repeat(1, 1fr); grid-template-rows: repeat(1, 1fr); gap: 10px; height: 500px;">
+    <iframe id="igraph3" scrolling="no" seamless="seamless" src="{{url('/age_tournament')}}" height="50%" width="50%"></iframe>
 
-<iframe id="igraph3" scrolling="no" seamless="seamless" src="{{url('/age_tournament')}}" height="50%" width="50%"></iframe>
-
-<iframe id="igraph4" scrolling="no" seamless="seamless" src="{{url('/goals_country')}}" height="50%" width="50%"></iframe>
-
-<iframe id="igraph5" scrolling="no" seamless="seamless" src="{{url('/position')}}" height="50%" width="50%"></iframe>
 </div>
 </body>

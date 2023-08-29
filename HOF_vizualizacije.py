@@ -9,7 +9,7 @@ import psycopg2
 
 import Data.auth_public as auth
 
-folder_path = "/Users/valgroleger/Svetovna-prvenstva-v-nogometu/views/graphs"
+folder_path = "/views/graphs"
 
 
 headerColor = 'grey'
