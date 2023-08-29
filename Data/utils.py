@@ -96,7 +96,6 @@ TABLE_DATA = {
         "position_code": "str",
         "starter": "bool",
         "substitute": "bool",
-        "captain": "bool",
     },
     "players": {
         "player_id": "str",
