@@ -858,7 +858,7 @@ def award_country():
         awards_country = f"""SELECT  t.team_name,
         -- c.confederation_code,
         award_name, count(award_id) AS num_of_awards FROM award_winners a
-        left join player_team pt on pt.player_id = a.player_id
+        left join v_player_team pt on pt.player_id = a.player_id
         LEFT join teams t on pt.team_id = t.team_id
         LEFT join confederations c on c.confederation_id = t.confederation_id
         WHERE t.team_name in ({drzave})
@@ -869,7 +869,7 @@ def award_country():
         awards_country = """SELECT  t.team_name,
         -- c.confederation_code,
         award_name, count(award_id) AS num_of_awards FROM award_winners a
-        left join player_team pt on pt.player_id = a.player_id
+        left join v_player_team pt on pt.player_id = a.player_id
         LEFT join teams t on pt.team_id = t.team_id
         join confederations c on c.confederation_id = t.confederation_id
         GROUP BY t.team_name, c.confederation_code, a.award_name 

@@ -14,8 +14,8 @@ from typing import Callable, List, Type, TypeVar
 
 from pandas import DataFrame
 
-import auth_public as auth
-from Modeli import Uporabnik
+import Data.auth_public as auth
+from Data.Modeli import Uporabnik
 
 # import dataclasses
 # Ustvarimo generično TypeVar spremenljivko. Dovolimo le naše entitene, ki jih imamo tudi v bazi
