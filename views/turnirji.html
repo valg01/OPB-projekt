@@ -21,6 +21,8 @@
 
 </style>
 
+%if znacka != 0:
+
 <div class="grid-container">
 
 <iframe id="igraph1" scrolling="no" seamless="seamless" src="{{url('/red_cards')}}" height="80%" width="100%"></iframe>
@@ -32,5 +34,15 @@
 <iframe id="igraph1" scrolling="no" seamless="seamless" src="{{url('/matches_tour')}}" height="80%" width="100%"></iframe>
 
 </div>
+
+% else:
+
+<p>
+  Za ogled te sekcije se morate prijaviti!
+</p>
+
+
+%end
+
 
 </body>

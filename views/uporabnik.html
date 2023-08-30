@@ -4,6 +4,9 @@
 % rebase('base.html', napaka=napaka, naslov=naslov)
 
 <br>
+
+%if znacka != 0:
+
 <div class="container">
     <div class="row justify-content-md-center">
         <div class="col col-lg-4">
@@ -77,3 +80,11 @@
         %end
     </div>
 </div>
+
+% else:
+
+<p>
+  Za ogled te sekcije se morate prijaviti!
+</p>
+
+%end
