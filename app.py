@@ -31,7 +31,7 @@ from Data.Modeli import *
 from Data.Services import AuthService
 import pandas as pd
 
-# problem s šumniki
+# problem s sumniki
 psycopg2.extensions.register_type(psycopg2.extensions.UNICODE)
 conn = auth.connect()
 cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -55,7 +55,7 @@ def graf_assets(ime: str):
     return template(f'graphs/{ime}.html')"""
 
 
-# za ločitev med prijavo in odjavo
+# za locitev med prijavo in odjavo
 def preveri_znacko():
     """
     Checks if the user has a valid session cookie and returns 1 if they do, 0 otherwise.
@@ -185,7 +185,7 @@ def registracija_post():
 
     if not registracija_ok_bool:
         response.set_cookie("sporocilo", msg)  # , secret=SECRET_COOKIE_KEY, path="/")
-        # imamo napako, nastavimo piškotke in preusmerimo
+        # imamo napako, nastavimo piskotke in preusmerimo
         response.set_cookie("ime", ime, path="/", secret=SECRET_COOKIE_KEY)
         response.set_cookie("priimek", priimek, path="/", secret=SECRET_COOKIE_KEY)
         response.set_cookie("vloga", vloga, path="/", secret=SECRET_COOKIE_KEY)
@@ -193,7 +193,7 @@ def registracija_post():
             "navijaska_drzava", navijaska_drzava, path="/", secret=SECRET_COOKIE_KEY
         )
         response.set_cookie("email", email, path="/", secret=SECRET_COOKIE_KEY)
-        redirect(url("registracija_get"))
+        redirect(url("about"))
 
     hash_gesla = DBUtils.izracunaj_hash_gesla(geslo)
 
@@ -205,11 +205,11 @@ def registracija_post():
         id_uporabnika = DBUtils().dobi_prvi_rezultat(cur)
         conn.commit()
 
-        print("Vnos uspešen!")
         response.set_cookie("id", id_uporabnika, path="/", secret=SECRET_COOKIE_KEY)
     except IndexError:
         response.set_cookie("sporocilo", "Napaka pri vnosu v bazo!")
 
+    response.delete_cookie("sporocilo")
     redirect(url("uporabnik_get"))
 
 
@@ -256,7 +256,8 @@ def prijava_post():
     cur.execute("SELECT id FROM uporabniki WHERE email = %s", [email])
     id_uporabnika = DBUtils().dobi_prvi_rezultat(cur)
     response.set_cookie("id", id_uporabnika, secret=SECRET_COOKIE_KEY, path="/")
-    redirect(url("uporabnik_get"))
+    response.delete_cookie("sporocilo")
+    redirect(url("about"))
 
 
 def pridobi_razpolozljive_drzave(cur, id_uporabnika):
@@ -376,7 +377,6 @@ def uporabnik_post_dodaj_drzavo():
     id_uporabnika = preveri_uporabnika()
     ime_dodane_drzave = request.forms.ime_dodane_drzave  # type: ignore
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    print("Dodajam državo", ime_dodane_drzave)
     if ime_dodane_drzave != "":
         dodaj_drzavo(cur, id_uporabnika, ime_dodane_drzave)
     redirect(url("uporabnik_get"))
@@ -527,22 +527,7 @@ def drzave():
         A rendered HTML template of the statistics page for teams.
     """
     znacka = preveri_znacko()
-    return template("drzave.html", naslov="Države", znacka=znacka)
-
-
-@get("/statistike_ekip")
-def statistike_ekip():
-    """
-    Renders the statistics page for teams.
-
-    Args:
-        None.
-
-    Returns:
-        A rendered HTML template of the statistics page for teams.
-    """
-    znacka = preveri_znacko()
-    return template("statistike_ekip.html", naslov="Statistike ekip", znacka=znacka)
+    return template("drzave.html", naslov="Drzave", znacka=znacka)
 
 
 @get("/igralci")
@@ -598,7 +583,7 @@ def profil_post():
     cur.execute("SELECT geslo FROM uporabniki WHERE id = %s", [id_uporabnika])
     hash_geslo = DBUtils().dobi_prvi_rezultat(cur)
     if DBUtils.izracunaj_hash_gesla(staro_geslo) != hash_geslo:
-        response.set_cookie("sporocilo", 'Staro geslo je napačno!')
+        response.set_cookie("sporocilo", 'Staro geslo je napacno!')
         redirect(url('profil_get'))
     elif len(novo_geslo1) < 4:
         response.set_cookie("sporocilo", 'Novo geslo mora imeti vsaj 4 znake!')
@@ -611,6 +596,7 @@ def profil_post():
         cur.execute("UPDATE uporabniki SET geslo = %s WHERE id = %s", [novo_geslo, id_uporabnika])
         conn.commit()
         response.set_cookie("sporocilo", 'Uspesno')
+        response.delete_cookie("sporocilo")
         redirect(url('profil_get'))
 
 @get("/wins")
@@ -804,7 +790,7 @@ def matches_tour():
     return template(f"graphs/matches_tour.html")
 
 
-#######Države
+#######Drzave
 @get("/tour_c")
 def tour_c():
     uporabnik_id = preveri_uporabnika()
