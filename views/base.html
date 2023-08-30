@@ -28,13 +28,14 @@
                     </a>
                     <a class="navbar-brand" href="{{url('about')}}">O platformi</a>
                     <a class="navbar-brand" href="{{url('hall_of_fame')}}">Hall of fame</a>
-                    <a class="navbar-brand" href="{{url('/turnirji')}}">Turnirji</a>
-                    <a class="navbar-brand" href="{{url('/drzave')}}">Države</a>
-                    <a class="navbar-brand" href="{{url('/igralci')}}">Igralci</a>
+
                     %if znacka == 0:
                     <a class="navbar-brand" href="{{url('prijava_get')}}">Prijava</a>
                     <a class="navbar-brand" href="{{url('registracija_get')}}">Registracija</a>
                     % else:
+                    <a class="navbar-brand" href="{{url('/turnirji')}}">Turnirji</a>
+                    <a class="navbar-brand" href="{{url('/drzave')}}">Države</a>
+                    <a class="navbar-brand" href="{{url('/igralci')}}">Igralci</a>                    
                     <a class="navbar-brand" href="{{url('uporabnik_get')}}">Uporabnik</a>
                     <a class="navbar-brand" href="{{url('profil_get')}}">Profil</a>
                     <a class="navbar-brand" href="{{url('odjava')}}">Odjava</a>
@@ -112,7 +113,7 @@
                     </svg>
                 </a>
 
-                <a class="btn btn-outline-light btn-floating m-1" href="https://github.com/MatejRojec/Gamma"
+                <a class="btn btn-outline-light btn-floating m-1" href="https://github.com/valg01/Svetovna-prvenstva-v-nogometu"
                     role="button">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                         class="bi bi-github" viewBox="0 0 16 16">
@@ -145,7 +146,12 @@
                                 <br>
                                 <a class="text-white" href="{{url('hall_of_fame')}}">Hall of fame</a>
                                 <br>
-                                <a class="text-white" href="{{url('statistike_ekip')}}">Statistike ekip</a>
+                                <a class="text-white" href="{{url('turnirji')}}">Turnirji</a>
+                                <br>
+                                <a class="text-white" href="{{url('drzave')}}">Države</a>
+                                <br>
+                                <a class="text-white" href="{{url('igralci')}}">Igralci</a>
+                                <br>
                             </li>
                         </ul>
                     </div>
