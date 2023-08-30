@@ -116,7 +116,7 @@ class RegistracijaUtils:
                 If the registration information is invalid, the boolean value is False and the message is an error message.
         """
         if RegistracijaUtils()._email_ze_obstaja_q(email, cur):
-            return (False, "Registracija ni možna ta email je že v uporabi!")
+            return (False, "Registracija ni mozna - ta email je ze v uporabi!")
         elif RegistracijaUtils()._geslo_prekratko(geslo):
             return (False, "Geslo mora imeti vsaj 4 znake!")
         elif not RegistracijaUtils()._gesli_enaki(geslo, ponovljeno_geslo):
