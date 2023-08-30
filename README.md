@@ -2,6 +2,10 @@
 
 Projekt, ki analizira podatke iz svetovnih prvenstev v nogometu v letih 1930-2022. Cilj tega projekta je zagotoviti organiziran in učinkovit način za shranjevanje in upravljanje podatkov, povezanih s tekmami nogometnega svetovnega prvenstva, ekipami, igralci in drugimi povezanimi informacijami, ter vse to predstaviti na spletnem vmesniku. Podatke sva uvozila iz [obstoječe podatkovne baze](https://github.com/jfjelstul/worldcup?fbclid=IwAR2ezFC64kBLC75OSXOg4iR_lhlddSlkgLrC-Y9Eh3A6-wpyasCd03UrwKg).
 
+## Spletni dostop
+
+TODO
+
 
 ## ER diagram
 <img width="1230" alt="image" src="https://user-images.githubusercontent.com/82824154/230346357-85a50732-d205-40ca-bcaf-94098c841462.png">
