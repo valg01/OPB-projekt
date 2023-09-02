@@ -527,7 +527,7 @@ def drzave():
         A rendered HTML template of the statistics page for teams.
     """
     znacka = preveri_znacko()
-    return template("drzave.html", naslov="Drzave", znacka=znacka)
+    return template("drzave.html", naslov="Države", znacka=znacka)
 
 
 @get("/igralci")
