@@ -2,6 +2,7 @@
 import psycopg2
 import psycopg2.extensions
 import psycopg2.extras
+import os
 
 psycopg2.extensions.register_type(
     psycopg2.extensions.UNICODE
@@ -31,7 +32,7 @@ class Repo:
             host=auth.host,
             user=auth.user,
             password=auth.password,
-            port=5432,
+            port=os.environ.get('POSTGRES_PORT', 5432),
         )
         self.cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
