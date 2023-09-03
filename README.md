@@ -4,7 +4,10 @@ Projekt, ki analizira podatke iz svetovnih prvenstev v nogometu v letih 1930-202
 
 ## Spletni dostop
 
-TODO
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/valg01/Svetovna-prvenstva-v-nogometu/main)
+
+.. image:: https://mybinder.org/badge_logo.svg
+ :target: https://mybinder.org/v2/gh/valg01/Svetovna-prvenstva-v-nogometu/main
 
 
 ## ER diagram
