@@ -8,6 +8,7 @@ Projekt, ki analizira podatke iz svetovnih prvenstev v nogometu v letih 1930-202
 
 ## ER diagram
 <img width="1230" alt="image" src="https://user-images.githubusercontent.com/82824154/230346357-85a50732-d205-40ca-bcaf-94098c841462.png">
+
 ## Struktura baze
 
 Tu so naštete tabele, ki jih bova v najini bazi imela:
